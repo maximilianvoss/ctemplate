@@ -55,7 +55,11 @@ void translation_closeSourceFile(FILE *file) {
 
 void translation_compileCode(char *sourcePath, char *libraryPath) {
 	char buffer[BUFFER_SIZE];
-	strcpy(buffer, "gcc -shared -o ");
+
+	strcpy(buffer, COMPILER);
+	strcat(buffer, " ");
+	strcat(buffer, COMPILER_FLAGS);
+	strcat(buffer, " -o ");
 	strcat(buffer, libraryPath);
 	strcat(buffer, " ");
 	strcat(buffer, sourcePath);

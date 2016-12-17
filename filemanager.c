@@ -1,4 +1,5 @@
 #include "filemanager.h"
+#include "ctemplate.h"
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -11,7 +12,7 @@ char *filemanager_getSourcePath(char *templatePath) {
 	char *filename = filemanager_getFilename(templatePath);
 	
 	char *sourcePath = (char *) calloc( sizeof(char), 4096);
-	strcpy(sourcePath, WORKPATH);
+	strcpy(sourcePath, ctemplate_getWorkingBaseDir());
 	strcat(sourcePath, filename);
 
 	char *suffix = filemanager_getSuffix(sourcePath);
@@ -25,7 +26,7 @@ char *filemanager_getCompilationPath(char *templatePath) {
 	char *filename = filemanager_getFilename(templatePath);
 
 	char *compilationPath = (char *) calloc( sizeof(char), 4096);
-	strcpy(compilationPath, WORKPATH);
+	strcpy(compilationPath, ctemplate_getWorkingBaseDir());
 	strcat(compilationPath, filename);
 
 	char *suffix = filemanager_getSuffix(compilationPath);
@@ -94,6 +95,6 @@ filemanager_time* filemanager_getModifiedDate(filemanager_fileinfo *fileinfo) {
 }
 
 // check if file exists
-char filemanager_fileExists(filemanager_fileinfo *fileinfo) {
-	return ( fileinfo == NULL );
+char filemanager_fileNotExists(filemanager_fileinfo *fileinfo) {
+	return !( fileinfo == NULL );
 }
