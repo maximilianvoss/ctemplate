@@ -10,6 +10,7 @@ struct loader_module_s {
 	struct loader_module_s *next;
 	struct loader_module_s *prev;
 };
+
 typedef struct loader_module_s loader_module_t;
 
 loader_module_t *loader_getModule(loader_module_t *modules, char *moduleName);
