@@ -3,6 +3,12 @@
     <title>Template 1</title>
 </head>
 <body>
+<c:set var="abc" value="def"/>
+<c:set var="def" value="${abc}"/>
+<c:out value="def"/>
+defgh
+<c:out value="${def}"/>
+defgh
 Template 1
 </body>
 </html>

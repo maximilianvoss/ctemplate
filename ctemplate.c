@@ -3,70 +3,72 @@
 #include "loader.h"
 #include "date.h"
 #include "translation.h"
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
 
-char ctemplate_recompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
+char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
 
 static loader_module_t *modules = NULL;
-static char *templateBaseDir = NULL;
-static char *workingBaseDir = NULL;
+static csafestring_t *templateBaseDir;
+static csafestring_t *workingBaseDir;
 static char alwaysRecompile = 0;
 
 void ctemplate_init(char *templatePath, char *workingPath, char recompile) {
-	size_t length;
 
 	if ( templatePath != NULL ) {
-		length = strlen(templatePath);
-		templateBaseDir = (char *) calloc(sizeof(char), length + 2);
-		strcpy(templateBaseDir, templatePath);
-		if ( templateBaseDir[length] != '/' ) {
-			templateBaseDir[length + 1] = '/';
+		templateBaseDir = safe_create(templatePath);
+		if ( templateBaseDir->data[safe_strlen(templateBaseDir)] != '/' ) {
+			safe_strcat(templateBaseDir, "/");
 		}
 	}
 
 	if ( workingPath != NULL ) {
-		length = strlen(workingPath);
-		workingBaseDir = (char *) calloc(sizeof(char), length + 2);
-		strcpy(workingBaseDir, workingPath);
-		if ( workingBaseDir[length] != '/' ) {
-			workingBaseDir[length + 1] = '/';
+		workingBaseDir = safe_create(workingPath);
+		if ( workingBaseDir->data[safe_strlen(workingBaseDir)] != '/' ) {
+			safe_strcat(workingBaseDir, "/");
 		}
 	}
+
 	alwaysRecompile = recompile;
 }
 
-char *ctemplate_executeTemplate(char *templatePath, void *data) {
+char *ctemplate_executeTemplate(char *templateName, void *data) {
 
-	if ( templatePath == NULL ) {
+	if ( templateName == NULL ) {
 		return NULL;
 	}
 
-	size_t length = strlen(templateBaseDir) + strlen(templatePath) + 1;
-	char *templateFullPath = (char *) calloc(sizeof(char), length);
-	strcpy(templateFullPath, templateBaseDir);
-	strcat(templateFullPath, templatePath);
+	csafestring_t *templatePath = safe_clone(templateBaseDir);
+	safe_strcat(templatePath, templateName);
 
-	char *templateName = filemanager_getFilename(templatePath);
-	char *sourcePath = filemanager_getSourcePath(templatePath);
-	char *libraryPath = filemanager_getCompilationPath(templatePath);
+	char *templateFile = filemanager_getFilename(templateName);
+	csafestring_t *sourcePath = filemanager_calculateSourcePath(templateFile);
+	csafestring_t *libraryPath = filemanager_calculateCompilationPath(templateFile);
 
-	loader_module_t *module = loader_getModule(modules, templateName);
-	if ( alwaysRecompile || ctemplate_recompilationNecessary(templateFullPath, sourcePath, libraryPath) ) {
+	loader_module_t *module = loader_getModule(modules, templatePath);
+	if ( alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
 
 		if ( module != NULL ) {
 			modules = loader_unloadModule(module);
 		}
-		translation_processTemplate(templateFullPath, sourcePath, libraryPath);
-		modules = loader_loadModule(modules, libraryPath, templateName);
-		module = loader_getModule(modules, templateName);
+		translation_processTemplate(templatePath->data, sourcePath->data, libraryPath->data);
+		modules = loader_loadModule(modules, libraryPath);
+		module = loader_getModule(modules, libraryPath);
 	} else if ( module == NULL ) {
-		modules = loader_loadModule(modules, libraryPath, templateName);
-		module = loader_getModule(modules, templateName);
+		modules = loader_loadModule(modules, libraryPath);
+		module = loader_getModule(modules, libraryPath);
 	}
+
+	csafestring_t *output = safe_create(NULL);
+	module->method(output);
+	printf("%s\n", output->data);
+	safe_destroy(output);
 	
-	module->method();
 	modules = loader_unloadModule(module);
+
+
+	safe_destroy(sourcePath);
+	safe_destroy(libraryPath);
+	safe_destroy(templatePath);
 
 	return NULL;
 }
@@ -75,11 +77,11 @@ void ctemplate_unload() {
 	while ( modules != NULL ) {
 		modules = loader_unloadModule(modules);
 	}
-	free(templateBaseDir);
-	free(workingBaseDir);
+	safe_destroy(templateBaseDir);
+	safe_destroy(workingBaseDir);
 }
 
-char ctemplate_recompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {
+char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {
 
 	filemanager_fileinfo *fileInfoTemplate = filemanager_getStatus(templatePath);
 	filemanager_fileinfo *fileInfoSource = filemanager_getStatus(sourcePath);
@@ -108,6 +110,6 @@ char ctemplate_recompilationNecessary(char *templatePath, char *sourcePath, char
 	return result;
 }
 
-char *ctemplate_getWorkingBaseDir() {
+csafestring_t *ctemplate_getWorkingBaseDir() {
 	return workingBaseDir;
 }

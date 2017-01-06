@@ -1,11 +1,9 @@
 #include <dlfcn.h>
 #include "loader.h"
-#include <string.h>
-#include <stdlib.h>
 
-loader_module_t *loader_getModule(loader_module_t *modules, char *moduleName) {
+loader_module_t *loader_getModule(loader_module_t *modules, csafestring_t *modulePath) {
 	while ( modules != NULL ) {
-		if ( !strcmp(moduleName, modules->name) ) {
+		if ( !safe_strcmp(modulePath, modules->path->data) ) {
 			return modules;
 		}
 		modules = modules->next;
@@ -13,18 +11,14 @@ loader_module_t *loader_getModule(loader_module_t *modules, char *moduleName) {
 	return NULL;
 }
 
-loader_module_t *loader_loadModule(loader_module_t *modules, char *modulePath, char *moduleName) {
+loader_module_t *loader_loadModule(loader_module_t *modules, csafestring_t *modulePath) {
 
 	loader_module_t *module;
 	module = (loader_module_t *) malloc(sizeof(loader_module_t));
 
-	module->name = (char *) calloc(sizeof(char), strlen(moduleName) + 1);
-	strcpy(module->name, moduleName);
+	module->path = safe_clone(modulePath);
 
-	module->path = (char *) calloc(sizeof(char), strlen(modulePath) + 1);
-	strcpy(module->path, modulePath);
-
-	module->handle = dlopen(module->path, RTLD_LAZY);
+	module->handle = dlopen(module->path->data, RTLD_LAZY);
 	module->method = dlsym(module->handle, "execute");
 
 	if ( modules == NULL ) {
@@ -58,8 +52,7 @@ loader_module_t *loader_unloadModule(loader_module_t *module) {
 
 	dlclose(module->handle);
 
-	free(module->path);
-	free(module->name);
+	safe_destroy(module->path);
 	free(module);
 
 	return tmp;

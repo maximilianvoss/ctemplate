@@ -1,35 +1,26 @@
 #include "filemanager.h"
 #include "ctemplate.h"
-#include <string.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <time.h>
 
-char *filemanager_getFilename(char *path);
 char *filemanager_getSuffix(char *path);
 
-char *filemanager_getSourcePath(char *templatePath) {
-	char *filename = filemanager_getFilename(templatePath);
+csafestring_t *filemanager_calculateSourcePath(char *templateFile) {
+	csafestring_t *sourcePath = safe_clone(ctemplate_getWorkingBaseDir());
+	safe_strcat(sourcePath, templateFile);
 
-	char *sourcePath = (char *) calloc(sizeof(char), 4096);
-	strcpy(sourcePath, ctemplate_getWorkingBaseDir());
-	strcat(sourcePath, filename);
-
-	char *suffix = filemanager_getSuffix(sourcePath);
+	char *suffix = filemanager_getSuffix(sourcePath->data);
 	*suffix = 'c';
 	*( suffix + 1 ) = '\0';
 
 	return sourcePath;
 }
 
-char *filemanager_getCompilationPath(char *templatePath) {
-	char *filename = filemanager_getFilename(templatePath);
+csafestring_t *filemanager_calculateCompilationPath(char *templateFile) {
+	csafestring_t *compilationPath = safe_clone(ctemplate_getWorkingBaseDir());
+	safe_strcat(compilationPath, templateFile);
 
-	char *compilationPath = (char *) calloc(sizeof(char), 4096);
-	strcpy(compilationPath, ctemplate_getWorkingBaseDir());
-	strcat(compilationPath, filename);
-
-	char *suffix = filemanager_getSuffix(compilationPath);
+	char *suffix = filemanager_getSuffix(compilationPath->data);
 	*suffix = 's';
 	*( suffix + 1 ) = 'o';
 	*( suffix + 2 ) = '\0';
@@ -38,39 +29,17 @@ char *filemanager_getCompilationPath(char *templatePath) {
 }
 
 char *filemanager_getFilename(char *path) {
-	char *ptr;
-	char *pos = NULL;
-
 	if ( path == NULL ) {
 		return NULL;
 	}
-
-	ptr = path;
-	while ( *ptr != '\0' ) {
-		if ( *ptr == '/' ) {
-			pos = ptr + 1;
-		}
-		ptr++;
-	}
-	return pos;
+	return ( strrchr(path, '/') + 1 );
 }
 
 char *filemanager_getSuffix(char *path) {
-	char *ptr;
-	char *pos = NULL;
-
 	if ( path == NULL ) {
 		return NULL;
 	}
-
-	ptr = path;
-	while ( *ptr != '\0' ) {
-		if ( *ptr == '.' ) {
-			pos = ptr + 1;
-		}
-		ptr++;
-	}
-	return pos;
+	return ( strrchr(path, '.') + 1 );
 }
 
 filemanager_fileinfo *filemanager_getStatus(char *path) {

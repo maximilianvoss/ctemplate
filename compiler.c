@@ -1,19 +1,17 @@
 #include "compiler.h"
-#include <string.h>
-#include <stdlib.h>
-
-#define BUFFER_SIZE 4096
+#include <csafestring.h>
 
 void compiler_compileCode(char *sourcePath, char *libraryPath) {
-	char buffer[BUFFER_SIZE];
 
-	strcpy(buffer, COMPILER);
-	strcat(buffer, " ");
-	strcat(buffer, COMPILER_FLAGS);
-	strcat(buffer, " -o ");
-	strcat(buffer, libraryPath);
-	strcat(buffer, " ");
-	strcat(buffer, sourcePath);
+	csafestring_t *string = safe_create(COMPILER);
+	safe_strcat(string, " ");
+	safe_strcat(string, COMPILER_FLAGS);
+	safe_strcat(string, " -o ");
+	safe_strcat(string, libraryPath);
+	safe_strcat(string, " ");
+	safe_strcat(string, sourcePath);
 
-	system(buffer);
+	system(string->data);
+
+	safe_destroy(string);
 }
