@@ -14,7 +14,7 @@ set(SOURCE_FILES
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3")
 
 add_library(ctemplate ${SOURCE_FILES})
-target_link_libraries(ctemplate ${CSAFESTRING_LIBRARY})
+target_link_libraries(ctemplate ${CSAFESTRING_LIBRARY} dl)
 install(TARGETS ctemplate DESTINATION /usr/local/lib)
 install(FILES ctemplate.h DESTINATION /usr/local/include)
 
