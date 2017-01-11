@@ -32,14 +32,16 @@ char *filemanager_getFilename(char *path) {
 	if ( path == NULL ) {
 		return NULL;
 	}
-	return ( strrchr(path, '/') + 1 );
+	char *pos = strrchr(path, '/');
+	return ( pos == NULL ) ? path : pos + 1; 
 }
 
 char *filemanager_getSuffix(char *path) {
 	if ( path == NULL ) {
 		return NULL;
 	}
-	return ( strrchr(path, '.') + 1 );
+	char *pos = strrchr(path, '.');
+	return ( pos == NULL ) ? path : pos + 1;
 }
 
 filemanager_fileinfo *filemanager_getStatus(char *path) {
@@ -65,5 +67,5 @@ filemanager_time *filemanager_getModifiedDate(filemanager_fileinfo *fileinfo) {
 
 // check if file exists
 char filemanager_fileNotExists(filemanager_fileinfo *fileinfo) {
-	return fileinfo != NULL;
+	return fileinfo->st_blocks == 0;
 }

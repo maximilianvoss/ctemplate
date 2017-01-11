@@ -3,7 +3,6 @@
 #include "loader.h"
 #include "date.h"
 #include "translation.h"
-#include <stdio.h>
 
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
 
@@ -14,18 +13,18 @@ static char alwaysRecompile = 0;
 
 void ctemplate_init(char *templatePath, char *workingPath, char recompile) {
 
-	if ( templatePath != NULL ) {
-		templateBaseDir = safe_create(templatePath);
-		if ( templateBaseDir->data[safe_strlen(templateBaseDir)] != '/' ) {
-			safe_strcat(templateBaseDir, "/");
-		}
+	templateBaseDir = safe_create(templatePath);
+	if ( !safe_strcmp(templateBaseDir, "") ) {
+		safe_strcpy(templateBaseDir, "./");
+	} else if ( templateBaseDir->data[safe_strlen(templateBaseDir)] != '/' ) {
+		safe_strchrappend(templateBaseDir, '/');
 	}
 
-	if ( workingPath != NULL ) {
-		workingBaseDir = safe_create(workingPath);
-		if ( workingBaseDir->data[safe_strlen(workingBaseDir)] != '/' ) {
-			safe_strcat(workingBaseDir, "/");
-		}
+	workingBaseDir = safe_create(workingPath);
+	if ( !safe_strcmp(workingBaseDir, "") ) {
+		safe_strcpy(workingBaseDir, "./");
+	} else if ( workingBaseDir->data[safe_strlen(workingBaseDir)] != '/' ) {
+		safe_strchrappend(workingBaseDir, '/');
 	}
 
 	alwaysRecompile = recompile;
@@ -39,6 +38,13 @@ char *ctemplate_executeTemplate(char *templateName, void *data) {
 
 	csafestring_t *templatePath = safe_clone(templateBaseDir);
 	safe_strcat(templatePath, templateName);
+
+	filemanager_fileinfo *templateInfo = filemanager_getStatus(templatePath->data);
+	if ( filemanager_fileNotExists(templateInfo) ) {
+		free(templateInfo);
+		return NULL;
+	}
+	free(templateInfo);
 
 	char *templateFile = filemanager_getFilename(templateName);
 	csafestring_t *sourcePath = filemanager_calculateSourcePath(templateFile);
@@ -60,17 +66,18 @@ char *ctemplate_executeTemplate(char *templateName, void *data) {
 
 	csafestring_t *output = safe_create(NULL);
 	module->method(output);
-	printf("%s\n", output->data);
-	safe_destroy(output);
-	
-	modules = loader_unloadModule(module);
 
+	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
+	memcpy (retVal, output->data, output->buffer_length);
+	safe_destroy(output);
+
+	modules = loader_unloadModule(module);
 
 	safe_destroy(sourcePath);
 	safe_destroy(libraryPath);
 	safe_destroy(templatePath);
 
-	return NULL;
+	return retVal;
 }
 
 void ctemplate_unload() {
