@@ -15,7 +15,7 @@ before_script:
 
   - wget https://github.com/maximilianvoss/json2map/archive/v${JSON2MAP_VERSION}.tar.gz -O /tmp/json2map.tar.gz
   - tar -xvzf /tmp/json2map.tar.gz -C /tmp
-  - (cd /tmp/json2map-JSON2MAP_VERSION; cmake -G "Unix Makefiles" && sudo make install)
+  - (cd /tmp/json2map-${JSON2MAP_VERSION}; cmake -G "Unix Makefiles" && sudo make install)
   
 script:
   - cmake -G "Unix Makefiles" && make && make test
