@@ -1,0 +1,4 @@
+<c:set var="var1" value="value1">
+<c:set var="var2" value="${var1}">
+var1: <c:out value="${var1}">,
+var2: <c:out value="${var2}">
