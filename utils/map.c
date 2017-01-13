@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef DEBUG
+#include <stdio.h>
+#endif
+
 typedef struct s_linkedlist {
 	char *key;
 	char *value;
@@ -46,7 +50,7 @@ void hash_destroyMap(void *data) {
 #endif
 }
 
-void hash_put(void *data, char *key, char *value) {
+void hash_set(void *data, char *key, char *value) {
 #ifdef DEBUG
 	printf("hash_put([void *], %s, %s)...\n", key, value);
 #endif
@@ -84,6 +88,36 @@ void hash_put(void *data, char *key, char *value) {
 #ifdef DEBUG
 	printf("hash_put([void *], %s, %s)... DONE\n", key, value);
 #endif
+}
+
+void hash_unset(void *data, char *key) {
+#ifdef DEBUG
+	printf("hash_unset([void *], %s)...\n", key);
+#endif
+
+	linkedlist_t *map = (linkedlist_t *) data;
+	if ( key == NULL ) {
+#ifdef DEBUG
+		printf("hash_unset([void *], %s)... DONE\n", key);
+#endif
+		return;
+	}
+	while ( map->next != NULL ) {
+		if ( map->next->key != NULL && !strcmp(map->next->key, key) ) {
+			linkedlist_t *tmp = map->next;
+			map->next = map->next->next;
+
+			free(tmp->key);
+			free(tmp->value);
+			free(tmp);
+			return;
+		}
+		map = map->next;
+	}
+#ifdef DEBUG
+	printf("hash_unset([void *], %s)... DONE\n", key);
+#endif
+	return;
 }
 
 char *hash_get(void *data, char *key) {

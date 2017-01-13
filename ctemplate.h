@@ -7,7 +7,8 @@ typedef struct {
 	void *(*createMap)();
 	void (*destroyMap)(void *map);
 	char *(*get)(void *map, char *key);
-	void (*put)(void *map, char *key, char *value);
+	void (*set)(void *map, char *key, char *value);
+	void (*unset)(void *map, char *key);
 	char *(*find)(void *map, char *pattern);
 } ctemplate_functions_t;
 

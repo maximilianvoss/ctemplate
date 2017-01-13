@@ -1,0 +1,4 @@
+<c:set var="var" value="value" />
+<c:out value="${var}" default="Var not set" />,
+<c:remove var="var" />
+<c:out value="${var}" default="Var not set" />
