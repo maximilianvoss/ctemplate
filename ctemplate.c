@@ -1,10 +1,14 @@
+#include <json2map.h>
 #include "ctemplate.h"
 #include "filemanager.h"
 #include "loader.h"
 #include "date.h"
 #include "translation.h"
 
+void *ctemplate_parseJson(char *json);
+char *ctemplate_executeModule(loader_module_t *module, char *json);
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
+loader_module_t *ctemplate_moduleLoader(csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
 
 static loader_module_t *modules = NULL;
 static csafestring_t *templateBaseDir;
@@ -52,6 +56,42 @@ char *ctemplate_executeTemplate(char *templateName, char *json) {
 	csafestring_t *sourcePath = filemanager_calculateSourcePath(templateFile);
 	csafestring_t *libraryPath = filemanager_calculateCompilationPath(templateFile);
 
+	loader_module_t *module = ctemplate_moduleLoader(templatePath, sourcePath, libraryPath);
+	char *retVal = ctemplate_executeModule(module, json);
+
+	safe_destroy(sourcePath);
+	safe_destroy(libraryPath);
+	safe_destroy(templatePath);
+
+	return retVal;
+}
+
+char *ctemplate_executeModule(loader_module_t *module, char *json) {
+	csafestring_t *output = safe_create(NULL);
+	void *data = ctemplate_parseJson(json);
+
+	module->method(output, mfunctions, data);
+
+	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
+	memcpy (retVal, output->data, output->buffer_length);
+
+	safe_destroy(output);
+	return retVal;
+}
+
+void *ctemplate_parseJson(char *json) {
+	void *data = mfunctions->createMap();
+
+	json2map_t *json2mapObj = json2map_init();
+	json2map_registerHook(json2mapObj, data, mfunctions->put);
+	json2map_parse(json2mapObj, json);
+	json2map_destroy(json2mapObj);
+
+	return data;
+}
+
+
+loader_module_t *ctemplate_moduleLoader(csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath) {
 	loader_module_t *module = loader_getModule(modules, templatePath);
 	if ( alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
 		if ( module != NULL ) {
@@ -64,20 +104,7 @@ char *ctemplate_executeTemplate(char *templateName, char *json) {
 		modules = loader_loadModule(modules, libraryPath);
 		module = loader_getModule(modules, libraryPath);
 	}
-
-	csafestring_t *output = safe_create(NULL);
-
-	module->method(output, mfunctions);
-
-	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
-	memcpy (retVal, output->data, output->buffer_length);
-
-	safe_destroy(output);
-	safe_destroy(sourcePath);
-	safe_destroy(libraryPath);
-	safe_destroy(templatePath);
-
-	return retVal;
+	return module;
 }
 
 void ctemplate_unload() {

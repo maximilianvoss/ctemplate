@@ -4,9 +4,16 @@
 </head>
 <body>
 
-<c:set var="variable" value="value"/>
+
 <c:out value="variable"/>
 :
 <c:out value="${variable}"/>
+;
+
+<c:set var="variable" value="new Value"/>
+<c:out value="new variable"/>
+:
+<c:out value="${variable}"/>
+
 </body>
 </html>

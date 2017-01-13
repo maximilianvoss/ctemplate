@@ -85,8 +85,7 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "	void (* put) (void *map, char *key, char *value);\n");
 	fprintf(file, "	char * (* find) (void *map, char *pattern);\n");
 	fprintf(file, "} ctemplate_functions_t;\n");
-	fprintf(file, "void execute(csafestring_t *string, ctemplate_functions_t *mfunction) {\n");
-	fprintf(file, "void *data = mfunction->createMap();\n");
+	fprintf(file, "void execute(csafestring_t *string, ctemplate_functions_t *mfunction, void *data) {\n");
 }
 
 void translation_closeSourceFile(FILE *file) {

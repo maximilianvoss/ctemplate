@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 	methods.find = hash_find;
 
 	ctemplate_init(EXAMPLEPATH, NULL, &methods, 1);
-	printf("%s\n", ctemplate_executeTemplate("template.html", NULL));
+	printf("%s\n", ctemplate_executeTemplate("template.html", "{\"variable\":\"value\"}"));
 	ctemplate_unload();
 	return 0;
 }
