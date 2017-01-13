@@ -6,9 +6,16 @@ compiler:
   - gcc
 
 before_script:
-  - wget https://github.com/maximilianvoss/csafestring/archive/v1.6.tar.gz -O /tmp/csafestring.tar.gz
+  - CSAFESTRING_VERSION=1.6; export CSAFESTRING_VERSION
+  - JSON2MAP_VERSION=0.14; export JSON2MAP_VERSION
+  
+  - wget https://github.com/maximilianvoss/csafestring/archive/v${CSAFESTRING_VERSION}.tar.gz -O /tmp/csafestring.tar.gz
   - tar -xvzf /tmp/csafestring.tar.gz -C /tmp
-  - (cd /tmp/csafestring-1.6; cmake -G "Unix Makefiles" && sudo make install)
+  - (cd /tmp/csafestring-${CSAFESTRING_VERSION}; cmake -G "Unix Makefiles" && sudo make install)
+
+  - wget https://github.com/maximilianvoss/json2map/archive/v${JSON2MAP_VERSION}.tar.gz -O /tmp/json2map.tar.gz
+  - tar -xvzf /tmp/json2map.tar.gz -C /tmp
+  - (cd /tmp/json2map-${JSON2MAP_VERSION}; cmake -G "Unix Makefiles" && sudo make install)
   
 script:
   - cmake -G "Unix Makefiles" && make && make test

@@ -78,10 +78,18 @@ void translation_processLine(FILE *out, char *line) {
 
 void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "#include <csafestring.h>\n");
-	fprintf(file, "void execute(csafestring_t *string) {\n");
+	fprintf(file, "typedef struct {\n");
+	fprintf(file, "	void * (* createMap) ();\n");
+	fprintf(file, "	void (* destroyMap) (void *map);\n");
+	fprintf(file, "	char * (* get) (void *map, char *key);\n");
+	fprintf(file, "	void (* put) (void *map, char *key, char *value);\n");
+	fprintf(file, "	char * (* find) (void *map, char *pattern);\n");
+	fprintf(file, "} ctemplate_functions_t;\n");
+	fprintf(file, "void execute(csafestring_t *string, ctemplate_functions_t *mfunction, void *data) {\n");
 }
 
 void translation_closeSourceFile(FILE *file) {
+	fprintf(file, "mfunction->destroyMap(data);\n");
 	fprintf(file, "}\n");
 	fclose(file);
 }
@@ -108,9 +116,9 @@ char *translation_functionSet(char *line, FILE *out) {
 		value += 2;
 		tmp = strchr(value, '}');
 		*tmp = '\0';
-		fprintf(out, "char *%s = %s;\n", var, value);
+		fprintf(out, "mfunction->put(data, \"%s\", mfunction->get(data, \"%s\"));", var, value);
 	} else {
-		fprintf(out, "char *%s = \"%s\";\n", var, value);
+		fprintf(out, "mfunction->put(data, \"%s\", \"%s\");", var, value);
 	}
 
 	returnPoint++;
@@ -131,7 +139,7 @@ char *translation_functionOut(char *line, FILE *out) {
 		value += 2;
 		tmp = strchr(value, '}');
 		*tmp = '\0';
-		fprintf(out, "safe_strcat(string, %s);\n", value);
+		fprintf(out, "safe_strcat(string, mfunction->get(data, \"%s\"));\n", value);
 	} else {
 		tmp = strchr(value, '\"');
 		*tmp = '\0';
