@@ -7,7 +7,7 @@ compiler:
 
 before_script:
   - CSAFESTRING_VERSION=1.6; export CSAFESTRING_VERSION
-  - JSON2MAP_VERSION=0.13; export JSON2MAP_VERSION
+  - JSON2MAP_VERSION=0.14; export JSON2MAP_VERSION
   
   - wget https://github.com/maximilianvoss/csafestring/archive/v${CSAFESTRING_VERSION}.tar.gz -O /tmp/csafestring.tar.gz
   - tar -xvzf /tmp/csafestring.tar.gz -C /tmp
