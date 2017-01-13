@@ -38,7 +38,7 @@ int test_fileNotExists() {
 
 int test_cout() {
 	char *value = ctemplate_executeTemplate("cout.txt", "{\"var\": \"value\"}");
-	ASSERTSTR("var: var,var-eval: value", value);
+	ASSERTSTR("var: var,var-eval: value,var-default: defaultValue,var-default-not-set: ", value);
 	free(value);
 	return 0;
 }
