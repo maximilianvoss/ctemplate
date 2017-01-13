@@ -11,7 +11,8 @@ int main(int argc, char **argv) {
 	methods.createMap = hash_createMap;
 	methods.destroyMap = hash_destroyMap;
 	methods.get = hash_get;
-	methods.put = hash_put;
+	methods.set = hash_set;
+	methods.unset = hash_unset;
 	methods.find = hash_find;
 
 	ctemplate_init(EXAMPLEPATH, NULL, &methods, 1);

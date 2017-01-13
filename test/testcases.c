@@ -52,7 +52,7 @@ int test_cset() {
 
 int test_cremove() {
 	char *value = ctemplate_executeTemplate("cremove.txt", NULL);
-	ASSERTSTR("value, Var not set", value);
+	ASSERTSTR("value,Var not set", value);
 	free(value);
 	return 0;
 }
@@ -62,7 +62,8 @@ int main(int argc, char **argv) {
 	methods.createMap = hash_createMap;
 	methods.destroyMap = hash_destroyMap;
 	methods.get = hash_get;
-	methods.put = hash_put;
+	methods.set = hash_set;
+	methods.unset = hash_unset;
 	methods.find = hash_find;
 
 	ctemplate_init(TESTPATH, NULL, &methods, 1);

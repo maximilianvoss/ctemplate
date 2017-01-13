@@ -11,6 +11,7 @@ void translation_closeSourceFile(FILE *file);
 void compiler_compileCode(char *sourcePath, char *libraryPath);
 char *translation_functionSet(char *line, FILE *out);
 char *translation_functionOut(char *line, FILE *out);
+char *translation_functionRemove(char *line, FILE *out);
 
 void translation_processTemplate(char *templatePath, char *sourcePath, char *libraryPath) {
 	char buffer[BUFFER_SIZE + 1];
@@ -66,6 +67,8 @@ void translation_processLine(FILE *out, char *line) {
 				line = translation_functionSet(line, out);
 			} else if ( !strncmp(( line + 3 ), "out", 3) ) {
 				line = translation_functionOut(line, out);
+			} else if ( !strncmp(( line + 3 ), "remove", 6) ) {
+				line = translation_functionRemove(line, out);
 			}
 		} else {
 			*ptr = *line;
@@ -83,7 +86,8 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "	void * (* createMap) ();\n");
 	fprintf(file, "	void (* destroyMap) (void *map);\n");
 	fprintf(file, "	char * (* get) (void *map, char *key);\n");
-	fprintf(file, "	void (* put) (void *map, char *key, char *value);\n");
+	fprintf(file, "	void (* set) (void *map, char *key, char *value);\n");
+	fprintf(file, "void (*unset)(void *map, char *key);\n");
 	fprintf(file, "	char * (* find) (void *map, char *pattern);\n");
 	fprintf(file, "} ctemplate_functions_t;\n");
 	fprintf(file, "void execute(csafestring_t *string, ctemplate_functions_t *mfunction, void *data) {\n");
@@ -118,9 +122,9 @@ char *translation_functionSet(char *line, FILE *out) {
 		value += 2;
 		tmp = strchr(value, '}');
 		*tmp = '\0';
-		fprintf(out, "mfunction->put(data, \"%s\", mfunction->get(data, \"%s\"));", var, value);
+		fprintf(out, "mfunction->set(data, \"%s\", mfunction->get(data, \"%s\"));", var, value);
 	} else {
-		fprintf(out, "mfunction->put(data, \"%s\", \"%s\");", var, value);
+		fprintf(out, "mfunction->set(data, \"%s\", \"%s\");", var, value);
 	}
 
 	returnPoint++;
@@ -160,6 +164,23 @@ char *translation_functionOut(char *line, FILE *out) {
 	if ( defaultValue != NULL ) {
 		free(defaultValue);
 	}
+
+	returnPoint++;
+	return returnPoint;
+}
+
+char *translation_functionRemove(char *line, FILE *out) {
+	char *returnPoint = strchr(line, '>');
+	char *tmp;
+	char *var = strstr(line, "var=\"");
+
+	var = strchr(var, '\"');
+	var++;
+
+	tmp = strchr(var, '\"');
+	*tmp = '\0';
+
+	fprintf(out, "mfunction->unset(data, \"%s\");\n", var);
 
 	returnPoint++;
 	return returnPoint;
