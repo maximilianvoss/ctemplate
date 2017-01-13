@@ -1,7 +1,6 @@
 #include "map.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 typedef struct s_linkedlist {
 	char *key;
@@ -10,19 +9,27 @@ typedef struct s_linkedlist {
 } linkedlist_t;
 
 void *hash_createMap() {
+#ifdef DEBUG
 	printf("hash_createMap()...\n");
+#endif
 	linkedlist_t *map = (linkedlist_t *) malloc(sizeof(linkedlist_t));
 	map->key = NULL;
 	map->value = NULL;
 	map->next = NULL;
+#ifdef DEBUG
 	printf("hash_createMap()... DONE\n");
+#endif
 	return map;
 }
 
 void hash_destroyMap(void *data) {
+#ifdef DEBUG
 	printf("hash_destroyMap([void *])...\n");
+#endif
 	if ( data == NULL ) {
+#ifdef DEBUG
 		printf("hash_destroyMap([void *])... DONE\n");
+#endif
 		return;
 	}
 	linkedlist_t *map = (linkedlist_t *) data;
@@ -34,15 +41,21 @@ void hash_destroyMap(void *data) {
 		free(map->value);
 	}
 	free(map);
+#ifdef DEBUG
 	printf("hash_destroyMap([void *])... DONE\n");
+#endif
 }
 
 void hash_put(void *data, char *key, char *value) {
+#ifdef DEBUG
 	printf("hash_put([void *], %s, %s)...\n", key, value);
+#endif
 	linkedlist_t *map = (linkedlist_t *) data;
 
 	if ( key == NULL ) {
+#ifdef DEBUG
 		printf("hash_put([void *], %s, %s)... DONE\n", key, value);
+#endif
 		return;
 	}
 
@@ -68,15 +81,21 @@ void hash_put(void *data, char *key, char *value) {
 	map = (linkedlist_t *) data;
 	element->next = map->next;
 	map->next = element;
+#ifdef DEBUG
 	printf("hash_put([void *], %s, %s)... DONE\n", key, value);
+#endif
 }
 
 char *hash_get(void *data, char *key) {
+#ifdef DEBUG
 	printf("hash_get([void *], %s)...\n", key);
-	
+#endif
+
 	linkedlist_t *map = (linkedlist_t *) data;
 	if ( key == NULL ) {
+#ifdef DEBUG
 		printf("hash_get([void *], %s)... DONE\n", key);
+#endif
 		return NULL;
 	}
 	while ( map != NULL ) {
@@ -85,7 +104,9 @@ char *hash_get(void *data, char *key) {
 		}
 		map = map->next;
 	}
+#ifdef DEBUG
 	printf("hash_get([void *], %s)... DONE\n", key);
+#endif
 	return NULL;
 }
 
