@@ -3,7 +3,7 @@ FIND_PATH(JSON2MAP_INCLUDE_DIR json2map.h map2json.h
         /usr/include
         )
 
-SET(JSON2MAP_NAMES ${JSON2MAP_NAMES} JSON2MAP)
+SET(JSON2MAP_NAMES ${JSON2MAP_NAMES} json2map)
 FIND_LIBRARY(JSON2MAP_LIBRARY
         NAMES ${JSON2MAP_NAMES}
         PATHS /usr/lib /usr/local/lib
