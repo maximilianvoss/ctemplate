@@ -10,8 +10,9 @@ static loader_module_t *modules = NULL;
 static csafestring_t *templateBaseDir;
 static csafestring_t *workingBaseDir;
 static char alwaysRecompile = 0;
+static ctemplate_functions_t *mfunctions;
 
-void ctemplate_init(char *templatePath, char *workingPath, char recompile) {
+void ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, char recompile) {
 
 	templateBaseDir = safe_create(templatePath);
 	if ( !safe_strcmp(templateBaseDir, "") ) {
@@ -27,10 +28,11 @@ void ctemplate_init(char *templatePath, char *workingPath, char recompile) {
 		safe_strchrappend(workingBaseDir, '/');
 	}
 
+	mfunctions = methods;
 	alwaysRecompile = recompile;
 }
 
-char *ctemplate_executeTemplate(char *templateName, void *data) {
+char *ctemplate_executeTemplate(char *templateName, char *json) {
 
 	if ( templateName == NULL ) {
 		return NULL;
@@ -40,7 +42,7 @@ char *ctemplate_executeTemplate(char *templateName, void *data) {
 	safe_strcat(templatePath, templateName);
 
 	filemanager_fileinfo *templateInfo = filemanager_getStatus(templatePath->data);
-	if ( filemanager_fileNotExists(templateInfo) ) {
+	if ( filemanager_fileNotExists(filemanager_getStatus(templatePath->data)) ) {
 		free(templateInfo);
 		return NULL;
 	}
@@ -52,7 +54,6 @@ char *ctemplate_executeTemplate(char *templateName, void *data) {
 
 	loader_module_t *module = loader_getModule(modules, templatePath);
 	if ( alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
-
 		if ( module != NULL ) {
 			modules = loader_unloadModule(module);
 		}
@@ -65,14 +66,13 @@ char *ctemplate_executeTemplate(char *templateName, void *data) {
 	}
 
 	csafestring_t *output = safe_create(NULL);
-	module->method(output);
+
+	module->method(output, mfunctions);
 
 	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
 	memcpy (retVal, output->data, output->buffer_length);
+
 	safe_destroy(output);
-
-	modules = loader_unloadModule(module);
-
 	safe_destroy(sourcePath);
 	safe_destroy(libraryPath);
 	safe_destroy(templatePath);

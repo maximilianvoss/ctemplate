@@ -6,7 +6,7 @@ set(SOURCE_FILES
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTESTPATH='\"${CMAKE_SOURCE_DIR}/test\"'")
 
 add_executable(testcases ${SOURCE_FILES})
-target_link_libraries(testcases ctemplate)
+target_link_libraries(testcases ctemplate utils)
 
 add_test(NAME test_fileNotExists COMMAND testcases test_fileNotExists)
 add_test(NAME test_cset COMMAND testcases test_cset)

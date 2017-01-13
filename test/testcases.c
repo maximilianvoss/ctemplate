@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "../ctemplate.h"
+#include "../utils/map.h"
 
 #ifndef TESTPATH
 #define TESTPATH ""
@@ -50,7 +51,14 @@ int test_cset() {
 }
 
 int main(int argc, char **argv) {
-	ctemplate_init(TESTPATH, NULL, 1);
+	ctemplate_functions_t methods;
+	methods.createMap = hash_createMap;
+	methods.destroyMap = hash_destroyMap;
+	methods.get = hash_get;
+	methods.put = hash_put;
+	methods.find = hash_find;
+
+	ctemplate_init(TESTPATH, NULL, &methods, 1);
 
 	TESTCALL("test_fileNotExists", test_fileNotExists);
 	TESTCALL("test_cset", test_cset);

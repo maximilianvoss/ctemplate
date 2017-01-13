@@ -33,7 +33,7 @@ char *filemanager_getFilename(char *path) {
 		return NULL;
 	}
 	char *pos = strrchr(path, '/');
-	return ( pos == NULL ) ? path : pos + 1; 
+	return ( pos == NULL ) ? path : pos + 1;
 }
 
 char *filemanager_getSuffix(char *path) {
