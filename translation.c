@@ -1,6 +1,7 @@
 #include "translation.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define BUFFER_SIZE 4096
 
@@ -86,6 +87,7 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "	char * (* find) (void *map, char *pattern);\n");
 	fprintf(file, "} ctemplate_functions_t;\n");
 	fprintf(file, "void execute(csafestring_t *string, ctemplate_functions_t *mfunction, void *data) {\n");
+	fprintf(file, "char *tmpCout;\n");
 }
 
 void translation_closeSourceFile(FILE *file) {
@@ -126,24 +128,37 @@ char *translation_functionSet(char *line, FILE *out) {
 }
 
 char *translation_functionOut(char *line, FILE *out) {
-
+	char *tmp;
 	char *returnPoint = strchr(line, '>');
+
+	char *defaultValue = strstr(line, "default=\"");
+	if ( defaultValue != NULL ) {
+		defaultValue = strchr(defaultValue, '\"');
+		defaultValue++;
+		defaultValue = strdup(defaultValue);
+		tmp = strchr(defaultValue, '\"');
+		*tmp = '\0';
+	} 
 
 	char *value = strstr(line, "value=\"");
 	value = strchr(value, '\"');
 	value++;
 
-	char *tmp;
-
 	if ( !strncmp(value, "${", 2) ) {
 		value += 2;
 		tmp = strchr(value, '}');
 		*tmp = '\0';
-		fprintf(out, "safe_strcat(string, mfunction->get(data, \"%s\"));\n", value);
+
+		fprintf(out, "tmpCout = mfunction->get(data, \"%s\");\n", value);
+		fprintf(out, "safe_strcat(string, (tmpCout != NULL) ? tmpCout : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue : "");
 	} else {
 		tmp = strchr(value, '\"');
 		*tmp = '\0';
 		fprintf(out, "safe_strcat(string, \"%s\");\n", value);
+	}
+
+	if ( defaultValue != NULL ) {
+		free(defaultValue);
 	}
 
 	returnPoint++;

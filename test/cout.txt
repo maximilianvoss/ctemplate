@@ -1,2 +1,4 @@
 var: <c:out value="var">,
-var-eval: <c:out value="${var}">
+var-eval: <c:out value="${var}">,
+var-default: <c:out value="${varNonExisting}" default="defaultValue" />,
+var-default-not-set: <c:out value="${varNonExisting}"/>
