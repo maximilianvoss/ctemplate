@@ -50,6 +50,13 @@ int test_cset() {
 	return 0;
 }
 
+int test_cremove() {
+	char *value = ctemplate_executeTemplate("cremove.txt", NULL);
+	ASSERTSTR("value, Var not set", value);
+	free(value);
+	return 0;
+}
+
 int main(int argc, char **argv) {
 	ctemplate_functions_t methods;
 	methods.createMap = hash_createMap;
@@ -63,6 +70,7 @@ int main(int argc, char **argv) {
 	TESTCALL("test_fileNotExists", test_fileNotExists);
 	TESTCALL("test_cset", test_cset);
 	TESTCALL("test_cout", test_cout);
+	TESTCALL("test_cremove", test_cremove);
 
 	ctemplate_unload();
 	return -1;
