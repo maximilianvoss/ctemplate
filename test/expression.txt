@@ -1,3 +1,4 @@
+0: ${"Direct Expression"},
 1: <c:out value="${'Hallo'}" />,
 2: <c:out value='${"Hallo"}' />,
 3: <c:out value='${var1}' />,

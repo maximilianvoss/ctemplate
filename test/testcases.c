@@ -66,7 +66,9 @@ int test_cif() {
 
 int test_expression() {
 	char *value = ctemplate_executeTemplate("expression.txt", "{\"var1\":\"value\", \"var2\":4 }");
-	ASSERTSTR("1: Hallo,2: Hallo,3: value,4: 1,5: 0,6: 40,7: 40.000000,8: 40,9: 40.000000,10: 0,11: 1,12: 1,13: 1,14: 1,15: 0,16: 1,17: 1,18: 0,19: 0,20: 1,21: 0,22: 1,23: 0,24: 1", value);
+	ASSERTSTR(
+			"0: Direct Expression,1: Hallo,2: Hallo,3: value,4: 1,5: 0,6: 40,7: 40.000000,8: 40,9: 40.000000,10: 0,11: 1,12: 1,13: 1,14: 1,15: 0,16: 1,17: 1,18: 0,19: 0,20: 1,21: 0,22: 1,23: 0,24: 1",
+			value);
 	free(value);
 	return 0;
 }

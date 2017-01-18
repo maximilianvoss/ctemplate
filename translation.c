@@ -11,6 +11,7 @@ void translation_processLine(FILE *out, char *line);
 void translation_createSourceHeader(FILE *file);
 void translation_closeSourceFile(FILE *file);
 void compiler_compileCode(char *sourcePath, char *libraryPath);
+char *translation_functionExpression(char *line, FILE *out);
 char *translation_functionSet(char *line, FILE *out);
 char *translation_functionOut(char *line, FILE *out);
 char *translation_functionRemove(char *line, FILE *out);
@@ -58,6 +59,13 @@ void translation_processLine(FILE *out, char *line) {
 			*ptr = '\"';
 			ptr++;
 			line++;
+		} else if ( *line == '$' && *( line + 1 ) == '{' ) {
+			if ( *buffer != '\0' ) {
+				fprintf(out, "safe_strcat(string, \"%s\");\n", buffer);
+				memset(buffer, '\0', BUFFER_SIZE + 1);
+				ptr = buffer;
+			}
+			line = translation_functionExpression(line, out);
 		} else if ( *line == '<' && *( line + 1 ) == 'c' && *( line + 2 ) == ':' ) {
 			if ( *buffer != '\0' ) {
 				fprintf(out, "safe_strcat(string, \"%s\");\n", buffer);
@@ -117,7 +125,7 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "snprintf(str, size, \"%s\", expr);\n", "%d");
 	fprintf(file, "return str;\n");
 	fprintf(file, "}\n");
-	
+
 	fprintf(file, "void execute(csafestring_t *string, ctemplate_functions_t *mfunction, void *data) {\n");
 	fprintf(file, "char expressionString[255];\n");
 	fprintf(file, "char *tmp;\n");
@@ -177,6 +185,14 @@ char *translation_findEndOfTag(char *line) {
 		line++;
 	}
 	return NULL;
+}
+
+char *translation_functionExpression(char *line, FILE *out) {
+	char *endOfExpression = strchr(line, '}');
+	fprintf(out, "safe_strcat(string, ");
+	expression_eval(line, out, true);
+	fprintf(out, ");\n");
+	return endOfExpression + 1;
 }
 
 char *translation_functionSet(char *line, FILE *out) {

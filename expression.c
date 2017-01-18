@@ -118,7 +118,6 @@ pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation
 			break;
 		} else {
 			if ( matches != NULL ) {
-				printf("doesn't match: %s\n", string);
 				free(matches);
 			}
 			return NULL;
@@ -134,10 +133,6 @@ pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation
 		}
 		matched->type = type;
 		matched->next = NULL;
-
-//		printf("Orig String: %s\n", string);
-//		printf("String: %s\n", matched->string);
-//		printf("Type: %d\n", matched->type);
 
 		if ( matches == NULL ) {
 			matches = matched;
