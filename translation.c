@@ -18,6 +18,7 @@ char *translation_functionRemove(char *line, FILE *out);
 char *translation_functionIf(char *line, FILE *out);
 char *translation_functionWhen(char *line, FILE *out, bool isFirst);
 char *translation_functionOtherwise(char *line, FILE *out);
+char *translation_functionForEach(char *line, FILE *out);
 
 void translation_processTemplate(char *templatePath, char *sourcePath, char *libraryPath) {
 	char buffer[BUFFER_SIZE + 1];
@@ -90,6 +91,8 @@ void translation_processLine(FILE *out, char *line) {
 			} else if ( !strncmp(( line + 3 ), "choose", 6) ) {
 				selectIsFirst = true;
 				line = translation_findEndOfTag(line) + 1;
+			} else if ( !strncmp(( line + 3 ), "forEach", 7) ) {
+				line = translation_functionForEach(line, out);
 			} else if ( !strncmp(( line + 3 ), "otherwise", 9) ) {
 				line = translation_functionOtherwise(line, out);
 			} else {
@@ -102,7 +105,7 @@ void translation_processLine(FILE *out, char *line) {
 				ptr = buffer;
 			}
 
-			if ( !strncmp(( line + 4 ), "if", 2) || !strncmp(( line + 4 ), "when", 4) || !strncmp(( line + 4 ), "otherwise", 9) ) {
+			if ( !strncmp(( line + 4 ), "if", 2) || !strncmp(( line + 4 ), "when", 4) || !strncmp(( line + 4 ), "otherwise", 9) || !strncmp(( line + 4 ), "forEach", 7) ) {
 				line = strchr(line, '>');
 				line++;
 				fprintf(out, "}\n");
@@ -319,3 +322,34 @@ char *translation_functionOtherwise(char *line, FILE *out) {
 	fprintf(out, "else {\n");
 	return translation_findEndOfTag(line) + 1;
 }
+
+char *translation_functionForEach(char *line, FILE *out) {
+	csafestring_t *var = translation_extractVariable(line, "var");
+	csafestring_t *begin = translation_extractVariable(line, "begin");
+	csafestring_t *end = translation_extractVariable(line, "end");
+	csafestring_t *step = translation_extractVariable(line, "step");
+
+	if ( var == NULL || begin == NULL || end == NULL ) {
+		safe_destroy(var);
+		safe_destroy(begin);
+		safe_destroy(end);
+		safe_destroy(step);
+		return translation_findEndOfTag(line) + 1;
+	}
+
+	fprintf(out, "for ( int %s = %s; %s <= %s; ", var->data, begin->data, var->data, end->data);
+	if ( step == NULL ) {
+		fprintf(out, "%s++) {\n", var->data);
+	} else {
+		fprintf(out, "%s+=%s) {\n", var->data, step->data);
+	}
+	fprintf(out, "snprintf(expressionString, 255, \"%s\", %s);\n", "%d", var->data);
+	fprintf(out, "mfunction->set(data, \"%s\", expressionString);\n", var->data);
+
+	safe_destroy(var);
+	safe_destroy(begin);
+	safe_destroy(end);
+	safe_destroy(step);
+	return translation_findEndOfTag(line) + 1;
+}
+
