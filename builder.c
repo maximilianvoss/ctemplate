@@ -8,6 +8,13 @@ bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
 bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 	if ( matches->type == VARIABLE || matches->type == STRING ) {
 		if ( matches->next != NULL && matches->next->type == EQUATION && matches->next->next != NULL && ( matches->next->next->type == STRING || matches->next->next->type == VARIABLE ) ) {
+			if ( matches->type == VARIABLE ) {
+				fprintf(out, "mfunction->get(data, \"%s\") != NULL && ", matches->string);
+			}
+			if ( matches->next->next->type == VARIABLE ) {
+				fprintf(out, "mfunction->get(data, \"%s\") != NULL && ", matches->next->next->string);
+			}
+			
 			if ( !strncmp(matches->next->string, "eq", 2) || !strncmp(matches->next->string, "==", 2) ) {
 				fprintf(out, "!strcmp(");
 			} else {

@@ -16,6 +16,8 @@ char *translation_functionSet(char *line, FILE *out);
 char *translation_functionOut(char *line, FILE *out);
 char *translation_functionRemove(char *line, FILE *out);
 char *translation_functionIf(char *line, FILE *out);
+char *translation_functionWhen(char *line, FILE *out, bool isFirst);
+char *translation_functionOtherwise(char *line, FILE *out);
 
 void translation_processTemplate(char *templatePath, char *sourcePath, char *libraryPath) {
 	char buffer[BUFFER_SIZE + 1];
@@ -38,6 +40,7 @@ void translation_processTemplate(char *templatePath, char *sourcePath, char *lib
 void translation_processLine(FILE *out, char *line) {
 	char buffer[BUFFER_SIZE + 1];
 	memset(buffer, '\0', BUFFER_SIZE + 1);
+	static bool selectIsFirst;
 
 	char *ptr = buffer;
 	while ( *line != '\0' ) {
@@ -59,14 +62,14 @@ void translation_processLine(FILE *out, char *line) {
 			*ptr = '\"';
 			ptr++;
 			line++;
-		} else if ( *line == '$' && *( line + 1 ) == '{' ) {
+		} else if ( !strncmp(line, "${", 2) ) {
 			if ( *buffer != '\0' ) {
 				fprintf(out, "safe_strcat(string, \"%s\");\n", buffer);
 				memset(buffer, '\0', BUFFER_SIZE + 1);
 				ptr = buffer;
 			}
 			line = translation_functionExpression(line, out);
-		} else if ( *line == '<' && *( line + 1 ) == 'c' && *( line + 2 ) == ':' ) {
+		} else if ( !strncmp(line, "<c:", 3) ) {
 			if ( *buffer != '\0' ) {
 				fprintf(out, "safe_strcat(string, \"%s\");\n", buffer);
 				memset(buffer, '\0', BUFFER_SIZE + 1);
@@ -81,18 +84,30 @@ void translation_processLine(FILE *out, char *line) {
 				line = translation_functionRemove(line, out);
 			} else if ( !strncmp(( line + 3 ), "if", 2) ) {
 				line = translation_functionIf(line, out);
+			} else if ( !strncmp(( line + 3 ), "when", 4) ) {
+				line = translation_functionWhen(line, out, selectIsFirst);
+				selectIsFirst = false;
+			} else if ( !strncmp(( line + 3 ), "choose", 6) ) {
+				selectIsFirst = true;
+				line = translation_findEndOfTag(line) + 1;
+			} else if ( !strncmp(( line + 3 ), "otherwise", 9) ) {
+				line = translation_functionOtherwise(line, out);
+			} else {
+				line = translation_findEndOfTag(line) + 1;
 			}
-		} else if ( *line == '<' && *( line + 1 ) == '/' && *( line + 2 ) == 'c' && *( line + 3 ) == ':' ) {
+		} else if ( !strncmp(line, "</c:", 4) ) {
 			if ( *buffer != '\0' ) {
 				fprintf(out, "safe_strcat(string, \"%s\");\n", buffer);
 				memset(buffer, '\0', BUFFER_SIZE + 1);
 				ptr = buffer;
 			}
 
-			if ( !strncmp(( line + 4 ), "if", 2) ) {
+			if ( !strncmp(( line + 4 ), "if", 2) || !strncmp(( line + 4 ), "when", 4) || !strncmp(( line + 4 ), "otherwise", 9) ) {
 				line = strchr(line, '>');
 				line++;
 				fprintf(out, "}\n");
+			} else {
+				line = translation_findEndOfTag(line) + 1;
 			}
 		} else {
 			*ptr = *line;
@@ -264,14 +279,43 @@ char *translation_functionIf(char *line, FILE *out) {
 		return translation_findEndOfTag(line) + 1;
 	}
 
+	fprintf(out, "if ( ");
 	if ( !safe_strncmp(test, "${", 2) ) {
-		fprintf(out, "if ( ");
 		expression_eval(test->data, out, false);
-		fprintf(out, " ) {\n");
 	} else {
-		fprintf(out, "if ( %s ) {\n", test->data);
+		fprintf(out, "%s", test->data);
 	}
+	fprintf(out, " ) {\n");
 
 	safe_destroy(test);
+	return translation_findEndOfTag(line) + 1;
+}
+
+char *translation_functionWhen(char *line, FILE *out, bool isFirst) {
+	csafestring_t *test = translation_extractVariable(line, "test");
+
+	if ( test == NULL ) {
+		safe_destroy(test);
+		return translation_findEndOfTag(line) + 1;
+	}
+
+	if ( isFirst ) {
+		fprintf(out, "if ( ");
+	} else {
+		fprintf(out, "else if ( ");
+	}
+	if ( !safe_strncmp(test, "${", 2) ) {
+		expression_eval(test->data, out, false);
+	} else {
+		fprintf(out, "%s", test->data);
+	}
+	fprintf(out, " ) {\n");
+
+	safe_destroy(test);
+	return translation_findEndOfTag(line) + 1;
+}
+
+char *translation_functionOtherwise(char *line, FILE *out) {
+	fprintf(out, "else {\n");
 	return translation_findEndOfTag(line) + 1;
 }
