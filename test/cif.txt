@@ -2,6 +2,4 @@
 <c:if test="${var eq 'value'}">
 Works
 </c:if>
-<c:if test="${10 > 1}" >
- again
-</c:if>
+<c:if test="${10 > 1}"> again</c:if>

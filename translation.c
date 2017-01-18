@@ -1,10 +1,12 @@
 #include "translation.h"
 #include "expression.h"
 #include <string.h>
-#include <stdlib.h>
+#include <csafestring.h>
 
 #define BUFFER_SIZE 4096
 
+csafestring_t *translation_extractVariable(char *line, char *name);
+char *translation_findEndOfTag(char *line);
 void translation_processLine(FILE *out, char *line);
 void translation_createSourceHeader(FILE *file);
 void translation_closeSourceFile(FILE *file);
@@ -16,8 +18,6 @@ char *translation_functionIf(char *line, FILE *out);
 
 void translation_processTemplate(char *templatePath, char *sourcePath, char *libraryPath) {
 	char buffer[BUFFER_SIZE + 1];
-//	memset(buffer, '\0', BUFFER_SIZE + 1);
-
 	FILE *in = fopen(templatePath, "r");
 	FILE *out = fopen(sourcePath, "w");
 
@@ -129,121 +129,133 @@ void translation_closeSourceFile(FILE *file) {
 	fclose(file);
 }
 
+csafestring_t *translation_extractVariable(char *line, char *name) {
+	csafestring_t *searchStr = safe_create(name);
+	safe_strchrappend(searchStr, '=');
+	char boundaryChar;
+
+	char *startPos = strstr(line, searchStr->data);
+	if ( startPos == NULL ) {
+		safe_destroy(searchStr);
+		return NULL;
+	}
+	startPos += safe_strlen(searchStr);
+	safe_destroy(searchStr);
+
+	boundaryChar = *startPos;
+	startPos++;
+	csafestring_t *value = safe_create(NULL);
+	while ( *startPos != '\0' && *startPos != boundaryChar ) {
+		safe_strchrappend(value, *startPos);
+		startPos++;
+	}
+	return value;
+}
+
+char *translation_findEndOfTag(char *line) {
+	bool inQuote = false;
+	bool inDoubleQuote = false;
+
+	while ( *line != '\0' ) {
+		if ( *line == '\'' ) {
+			if ( inQuote ) {
+				inQuote = false;
+			} else {
+				inQuote = true;
+			}
+		} else if ( *line == '\"' ) {
+			if ( inDoubleQuote ) {
+				inDoubleQuote = false;
+			} else {
+				inDoubleQuote = true;
+			}
+		} else if ( *line == '>' ) {
+			if ( !inQuote && !inDoubleQuote ) {
+				return line;
+			}
+		}
+		line++;
+	}
+	return NULL;
+}
+
 char *translation_functionSet(char *line, FILE *out) {
-	char *tmp;
-	char boundValue;
-	char boundVar;
+	csafestring_t *value = translation_extractVariable(line, "value");
+	csafestring_t *var = translation_extractVariable(line, "var");
 
-	char *value = strstr(line, "value=");
-	boundValue = value[6];
-	value += 7;
-
-	char *var = strstr(line, "var=");
-	boundVar = var[4];
-	var += 5;
-
-	char *returnPoint = strchr(value, '>');
-
-	tmp = strchr(value, boundValue);
-	*tmp = '\0';
-
-	tmp = strchr(var, boundVar);
-	*tmp = '\0';
-
-	if ( !strncmp(value, "${", 2) ) {
-		fprintf(out, "mfunction->set(data, \"%s\", ", var);
-		expression_eval(value, out, true);
-		fprintf(out, ");\n");
-	} else {
-		fprintf(out, "mfunction->set(data, \"%s\", \"%s\");\n", var, value);
+	if ( value == NULL || var == NULL ) {
+		safe_destroy(value);
+		safe_destroy(var);
+		return translation_findEndOfTag(line) + 1;
 	}
 
-	returnPoint++;
-	return returnPoint;
+	if ( !safe_strncmp(value, "${", 2) ) {
+		fprintf(out, "mfunction->set(data, \"%s\", ", var->data);
+		expression_eval(value->data, out, true);
+		fprintf(out, ");\n");
+	} else {
+		fprintf(out, "mfunction->set(data, \"%s\", \"%s\");\n", var->data, value->data);
+	}
+
+	safe_destroy(value);
+	safe_destroy(var);
+	return translation_findEndOfTag(line) + 1;
 }
 
 char *translation_functionOut(char *line, FILE *out) {
-	char *tmp;
-	char boundValue;
-	char boundDefault;
+	csafestring_t *value = translation_extractVariable(line, "value");
+	csafestring_t *defaultValue = translation_extractVariable(line, "default");
 
-	char *defaultValue = strstr(line, "default=");
-	if ( defaultValue != NULL ) {
-		boundDefault = *( defaultValue + 8 );
-		defaultValue += 9;
-		defaultValue = strdup(defaultValue);
-		tmp = strchr(defaultValue, boundDefault);
-		*tmp = '\0';
+	if ( value == NULL ) {
+		safe_destroy(value);
+		safe_destroy(defaultValue);
+		return translation_findEndOfTag(line) + 1;
 	}
 
-	char *value = strstr(line, "value=");
-	boundValue = value[6];
-	value += 7;
-
-	tmp = strchr(value, boundValue);
-	char *returnPoint = strchr(tmp, '>');
-	*tmp = '\0';
-	
-	if ( !strncmp(value, "${", 2) ) {
-//		fprintf(out, "safe_strcat(string, ");
-//		expression_eval(value, out, true);
-//		fprintf(out, ");\n");
-
+	if ( !safe_strncmp(value, "${", 2) ) {
 		fprintf(out, "tmp = ");
-		expression_eval(value, out, true);
+		expression_eval(value->data, out, true);
 		fprintf(out, ";\n");
-		fprintf(out, "safe_strcat(string, (tmp != NULL) ? tmp : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue : "");
+		fprintf(out, "safe_strcat(string, (tmp != NULL) ? tmp : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue->data : "");
 	} else {
-		fprintf(out, "safe_strcat(string, \"%s\");\n", value);
+		fprintf(out, "safe_strcat(string, \"%s\");\n", value->data);
 	}
 
-	if ( defaultValue != NULL ) {
-		free(defaultValue);
-	}
-
-	returnPoint++;
-	return returnPoint;
+	safe_destroy(value);
+	safe_destroy(defaultValue);
+	return translation_findEndOfTag(line) + 1;
 }
 
 char *translation_functionRemove(char *line, FILE *out) {
-	char boundVar;
-	char *tmp;
-	char *var = strstr(line, "var=");
+	csafestring_t *var = translation_extractVariable(line, "var");
 
-	boundVar = var[4];
-	var += 5;
+	if ( var == NULL ) {
+		safe_destroy(var);
+		return translation_findEndOfTag(line) + 1;
+	}
 
-	char *returnPoint = strchr(var, '>');
+	fprintf(out, "mfunction->unset(data, \"%s\");\n", var->data);
 
-	tmp = strchr(var, boundVar);
-	*tmp = '\0';
-
-	fprintf(out, "mfunction->unset(data, \"%s\");\n", var);
-
-	returnPoint++;
-	return returnPoint;
+	safe_destroy(var);
+	return translation_findEndOfTag(line) + 1;
 }
 
 char *translation_functionIf(char *line, FILE *out) {
-	char boundTest;
-	char *tmp;
-	char *test = strstr(line, "test=");
-	boundTest = test[5];
-	test += 6;
+	csafestring_t *test = translation_extractVariable(line, "test");
 
-	tmp = strchr(test, boundTest);
-	char *returnPoint = strchr(tmp, '>');
-
-	if ( !strncmp(test, "${", 2) ) {
-		fprintf(out, "if ( ");
-		expression_eval(test, out, false);
-		fprintf(out, " ) {\n");
-	} else {
-		tmp = strchr(test, boundTest);
-		*tmp = '\0';
-		fprintf(out, "if ( %s ) {\n", test);
+	if ( test == NULL ) {
+		safe_destroy(test);
+		return translation_findEndOfTag(line) + 1;
 	}
 
-	returnPoint++;
-	return returnPoint;
+	if ( !safe_strncmp(test, "${", 2) ) {
+		fprintf(out, "if ( ");
+		expression_eval(test->data, out, false);
+		fprintf(out, " ) {\n");
+	} else {
+		fprintf(out, "if ( %s ) {\n", test->data);
+	}
+
+	safe_destroy(test);
+	return translation_findEndOfTag(line) + 1;
 }
