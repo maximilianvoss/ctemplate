@@ -8,10 +8,10 @@ link_directories(/usr/local/lib)
 include_directories(/usr/local/include)
 
 set(SOURCE_FILES
-        ctemplate.c ctemplate.h translation.c translation.h loader.c loader.h filemanager.c filemanager.h date.c date.h compiler.c compiler.h)
+        ctemplate.c ctemplate.h translation.c translation.h loader.c loader.h filemanager.c filemanager.h date.c date.h compiler.c compiler.h expression.c expression.h builder.c builder.h)
 
 #set(CMAKE_VERBOSE_MAKEFILE on)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g")
 
 add_library(ctemplate ${SOURCE_FILES})
 target_link_libraries(ctemplate ${CSAFESTRING_LIBRARY} ${JSON2MAP_LIBRARY} dl)
