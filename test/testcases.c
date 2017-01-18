@@ -87,6 +87,12 @@ int test_cchoose() {
 	return 0;
 }
 
+int test_cforeach() {
+	char *value = ctemplate_executeTemplate("cforeach.txt", NULL);
+	ASSERTSTR("Item 1, Item 2, Item 3, Item 4, Item 5", value);
+	return 0;
+}
+
 int main(int argc, char **argv) {
 	ctemplate_functions_t methods;
 	methods.createMap = hash_createMap;
@@ -105,6 +111,7 @@ int main(int argc, char **argv) {
 	TESTCALL("test_cif", test_cif);
 	TESTCALL("test_expression", test_expression);
 	TESTCALL("test_cchoose", test_cchoose);
+	TESTCALL("test_cforeach", test_cforeach);
 
 	ctemplate_unload();
 	return -1;
