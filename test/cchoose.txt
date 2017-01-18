@@ -1,0 +1,11 @@
+<c:choose>
+<c:when test="${var eq 'value1'}">
+value1 is set
+</c:when>
+<c:when test="${var eq 'value2'}">
+value2 is set
+</c:when>
+<c:otherwise>
+nothing is set
+</c:otherwise>
+</c:choose>
