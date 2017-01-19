@@ -78,18 +78,24 @@ int test_cchoose(ctemplate_t *ctemplate) {
 
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", "{\"var\":\"value1\"}");
 	ASSERTSTR("value1 is set", value);
+	free(value);
+	
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", "{\"var\":\"value2\"}");
 	ASSERTSTR("value2 is set", value);
+	free(value);
+	
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", NULL);
 	ASSERTSTR("nothing is set", value);
-
 	free(value);
+
 	return 0;
 }
 
 int test_cforeach(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cforeach.txt", NULL);
 	ASSERTSTR("Item 1, Item 2, Item 3, Item 4, Item 5", value);
+	free(value);
+	
 	return 0;
 }
 
