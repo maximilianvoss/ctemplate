@@ -1,7 +1,9 @@
 #ifndef CTEMPLATE_COUT_H
 #define CTEMPLATE_COUT_H
 
-void cout_register();
-void cout_unregister();
+#include "modules.h"
+
+void cout_register(translation_module_t *modules);
+void cout_unregister(translation_module_t *modules);
 
 #endif

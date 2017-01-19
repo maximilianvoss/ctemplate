@@ -1,6 +1,5 @@
 #include "cchoose.h"
 #include "expression.h"
-#include "modules.h"
 
 char *cchoose_openTag(char *line, FILE *out);
 char *cchoose_closeTag(char *line, FILE *out);
@@ -42,20 +41,20 @@ translation_module_t module_cotherwise = {
 		.next = NULL
 };
 
-void cchoose_register() {
+void cchoose_register(translation_module_t *modules) {
 	if ( module_cchoose.data == NULL ) {
 		module_cchoose.data = (bool *) malloc(sizeof(bool));
 	}
-	modules_register(&module_cchoose);
-	modules_register(&module_cwhen);
-	modules_register(&module_cotherwise);
+	modules_register(modules, &module_cchoose);
+	modules_register(modules, &module_cwhen);
+	modules_register(modules, &module_cotherwise);
 }
 
-void cchoose_unregister() {
+void cchoose_unregister(translation_module_t *modules) {
 	free(module_cchoose.data);
-	modules_unregister(&module_cchoose);
-	modules_unregister(&module_cwhen);
-	modules_unregister(&module_cotherwise);
+	modules_unregister(modules, &module_cchoose);
+	modules_unregister(modules, &module_cwhen);
+	modules_unregister(modules, &module_cotherwise);
 }
 
 char *cchoose_openTag(char *line, FILE *out) {

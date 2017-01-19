@@ -1,6 +1,5 @@
 #include "cif.h"
 #include "expression.h"
-#include "modules.h"
 
 char *cif_openTag(char *line, FILE *out);
 char *cif_closeTag(char *line, FILE *out);
@@ -16,12 +15,12 @@ translation_module_t module_cif = {
 		.next = NULL
 };
 
-void cif_register() {
-	modules_register(&module_cif);
+void cif_register(translation_module_t *modules) {
+	modules_register(modules, &module_cif);
 }
 
-void cif_unregister() {
-	modules_unregister(&module_cif);
+void cif_unregister(translation_module_t *modules) {
+	modules_unregister(modules, &module_cif);
 }
 
 char *cif_openTag(char *line, FILE *out) {

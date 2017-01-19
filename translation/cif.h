@@ -1,7 +1,9 @@
 #ifndef CTEMPLATE_CIF_H
 #define CTEMPLATE_CIF_H
 
-void cif_register();
-void cif_unregister();
+#include "modules.h"
+
+void cif_register(translation_module_t *modules);
+void cif_unregister(translation_module_t *modules);
 
 #endif

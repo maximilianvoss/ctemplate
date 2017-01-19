@@ -9,8 +9,6 @@
 
 char *modules_findEndOfTag(char *line);
 
-static translation_module_t *modules = NULL;
-
 csafestring_t *modules_extractVariable(char *line, char *name) {
 	csafestring_t *searchStr = safe_create(name);
 	safe_strchrappend(searchStr, '=');
@@ -34,39 +32,23 @@ csafestring_t *modules_extractVariable(char *line, char *name) {
 	return value;
 }
 
-void modules_register(translation_module_t *module) {
-	if ( modules == NULL ) {
-		modules = module;
-	} else {
-		module->next = modules;
-		modules = module;
-	}
+void modules_register(translation_module_t *modules, translation_module_t *module) {
+	module->next = modules->next;
+	modules->next = module;
 }
 
-void modules_unregister(translation_module_t *module) {
-	translation_module_t *tmp;
-
-	if ( modules != NULL ) {
-		if ( modules->next == NULL ) {
-			modules = NULL;
-		} else {
-			if ( modules == module ) {
-				modules = modules->next;
-			} else {
-				tmp = modules;
-				while ( tmp->next != NULL ) {
-					if ( tmp->next == module ) {
-						tmp->next = module->next;
-						break;
-					}
-					tmp = tmp->next;
-				}
-			}
+void modules_unregister(translation_module_t *modules, translation_module_t *module) {
+	translation_module_t *tmp = modules;
+	while ( tmp->next != NULL ) {
+		if ( tmp->next == module ) {
+			tmp->next = module->next;
+			break;
 		}
+		tmp = tmp->next;
 	}
 }
 
-void *modules_matches(char *line) {
+void *modules_matches(translation_module_t *modules, char *line) {
 	translation_module_t *tmp = modules;
 
 	if ( !( !strncmp(line, "<c:", 3) || !strncmp(line, "</c:", 4) || !strncmp(line, "${", 2) ) ) {
@@ -120,22 +102,31 @@ char *modules_findEndOfTag(char *line) {
 	return modules_findEndOfElement(line, '>');
 }
 
-void modules_init() {
-	cchoose_register();
-	cforeach_register();
-	cif_register();
-	cout_register();
-	cremove_register();
-	cset_register();
-	expression_register();
+translation_module_t *modules_init() {
+	translation_module_t *modules = (translation_module_t *) malloc(sizeof(translation_module_t));
+	modules->tagOpen = NULL;
+	modules->tagClose = NULL;
+	modules->next = NULL;
+
+	cchoose_register(modules);
+	cforeach_register(modules);
+	cif_register(modules);
+	cout_register(modules);
+	cremove_register(modules);
+	cset_register(modules);
+	expression_register(modules);
+
+	return modules;
 }
 
-void modules_destroy() {
-	cchoose_unregister();
-	cforeach_unregister();
-	cif_unregister();
-	cout_unregister();
-	cremove_unregister();
-	cset_unregister();
-	expression_unregister();
+void modules_destroy(translation_module_t *modules) {
+	cchoose_unregister(modules);
+	cforeach_unregister(modules);
+	cif_unregister(modules);
+	cout_unregister(modules);
+	cremove_unregister(modules);
+	cset_unregister(modules);
+	expression_unregister(modules);
+
+	free(modules);
 }

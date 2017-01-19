@@ -1,6 +1,5 @@
 #include "cout.h"
 #include "expression.h"
-#include "modules.h"
 
 char *cout_openTag(char *line, FILE *out);
 char *cout_closeTag(char *line, FILE *out);
@@ -16,12 +15,12 @@ translation_module_t module_cout = {
 		.next = NULL
 };
 
-void cout_register() {
-	modules_register(&module_cout);
+void cout_register(translation_module_t *modules) {
+	modules_register(modules, &module_cout);
 }
 
-void cout_unregister() {
-	modules_unregister(&module_cout);
+void cout_unregister(translation_module_t *modules) {
+	modules_unregister(modules, &module_cout);
 }
 
 char *cout_openTag(char *line, FILE *out) {

@@ -1,51 +1,48 @@
 #include <json2map.h>
 #include "ctemplate.h"
 #include "filemanager.h"
-#include "loader.h"
 #include "date.h"
 #include "translation.h"
-#include "translation/expression.h"
-#include "translation/modules.h"
 
-void *ctemplate_parseJson(char *json);
-char *ctemplate_executeModule(loader_module_t *module, char *json);
+void *ctemplate_parseJson(ctemplate_t *ctemplate, char *json);
+char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json);
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
-loader_module_t *ctemplate_moduleLoader(csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
+loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
 
-static loader_module_t *modules = NULL;
-static csafestring_t *templateBaseDir;
-static csafestring_t *workingBaseDir;
-static char alwaysRecompile = 0;
-static ctemplate_functions_t *mfunctions;
+ctemplate_t *ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, bool recompile) {
 
-void ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, char recompile) {
-	expression_init();
-	modules_init();
-	templateBaseDir = safe_create(templatePath);
-	if ( !safe_strcmp(templateBaseDir, "") ) {
-		safe_strcpy(templateBaseDir, "./");
-	} else if ( templateBaseDir->data[safe_strlen(templateBaseDir)] != '/' ) {
-		safe_strchrappend(templateBaseDir, '/');
+	ctemplate_t *ctemplate = (ctemplate_t *) malloc(sizeof(ctemplate_t));
+
+
+	ctemplate->templateBaseDir = safe_create(templatePath);
+	if ( !safe_strcmp(ctemplate->templateBaseDir, "") ) {
+		safe_strcpy(ctemplate->templateBaseDir, "./");
+	} else if ( ctemplate->templateBaseDir->data[safe_strlen(ctemplate->templateBaseDir)] != '/' ) {
+		safe_strchrappend(ctemplate->templateBaseDir, '/');
 	}
 
-	workingBaseDir = safe_create(workingPath);
-	if ( !safe_strcmp(workingBaseDir, "") ) {
-		safe_strcpy(workingBaseDir, "./");
-	} else if ( workingBaseDir->data[safe_strlen(workingBaseDir)] != '/' ) {
-		safe_strchrappend(workingBaseDir, '/');
+	ctemplate->workingBaseDir = safe_create(workingPath);
+	if ( !safe_strcmp(ctemplate->workingBaseDir, "") ) {
+		safe_strcpy(ctemplate->workingBaseDir, "./");
+	} else if ( ctemplate->workingBaseDir->data[safe_strlen(ctemplate->workingBaseDir)] != '/' ) {
+		safe_strchrappend(ctemplate->workingBaseDir, '/');
 	}
 
-	mfunctions = methods;
-	alwaysRecompile = recompile;
+	ctemplate->mfunctions = methods;
+	ctemplate->alwaysRecompile = recompile;
+	ctemplate->modules = NULL;
+	ctemplate->translation_modules = modules_init();
+
+	return ctemplate;
 }
 
-char *ctemplate_executeTemplate(char *templateName, char *json) {
+char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char *json) {
 
 	if ( templateName == NULL ) {
 		return NULL;
 	}
 
-	csafestring_t *templatePath = safe_clone(templateBaseDir);
+	csafestring_t *templatePath = safe_clone(ctemplate->templateBaseDir);
 	safe_strcat(templatePath, templateName);
 
 	filemanager_fileinfo *templateInfo = filemanager_getStatus(templatePath->data);
@@ -56,11 +53,11 @@ char *ctemplate_executeTemplate(char *templateName, char *json) {
 	free(templateInfo);
 
 	char *templateFile = filemanager_getFilename(templateName);
-	csafestring_t *sourcePath = filemanager_calculateSourcePath(templateFile);
-	csafestring_t *libraryPath = filemanager_calculateCompilationPath(templateFile);
+	csafestring_t *sourcePath = filemanager_calculateSourcePath(ctemplate, templateFile);
+	csafestring_t *libraryPath = filemanager_calculateCompilationPath(ctemplate, templateFile);
 
-	loader_module_t *module = ctemplate_moduleLoader(templatePath, sourcePath, libraryPath);
-	char *retVal = ctemplate_executeModule(module, json);
+	loader_module_t *module = ctemplate_moduleLoader(ctemplate, templatePath, sourcePath, libraryPath);
+	char *retVal = ctemplate_executeModule(ctemplate, module, json);
 
 	safe_destroy(sourcePath);
 	safe_destroy(libraryPath);
@@ -69,11 +66,11 @@ char *ctemplate_executeTemplate(char *templateName, char *json) {
 	return retVal;
 }
 
-char *ctemplate_executeModule(loader_module_t *module, char *json) {
+char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json) {
 	csafestring_t *output = safe_create(NULL);
-	void *data = ctemplate_parseJson(json);
+	void *data = ctemplate_parseJson(ctemplate, json);
 
-	module->method(output, mfunctions, data);
+	module->method(output, ctemplate->mfunctions, data);
 
 	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
 	memcpy (retVal, output->data, output->buffer_length);
@@ -82,11 +79,11 @@ char *ctemplate_executeModule(loader_module_t *module, char *json) {
 	return retVal;
 }
 
-void *ctemplate_parseJson(char *json) {
-	void *data = mfunctions->createMap();
+void *ctemplate_parseJson(ctemplate_t *ctemplate, char *json) {
+	void *data = ctemplate->mfunctions->createMap();
 
 	json2map_t *json2mapObj = json2map_init();
-	json2map_registerHook(json2mapObj, data, mfunctions->set);
+	json2map_registerHook(json2mapObj, data, ctemplate->mfunctions->set);
 	json2map_parse(json2mapObj, json);
 	json2map_destroy(json2mapObj);
 
@@ -94,30 +91,30 @@ void *ctemplate_parseJson(char *json) {
 }
 
 
-loader_module_t *ctemplate_moduleLoader(csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath) {
-	loader_module_t *module = loader_getModule(modules, templatePath);
-	if ( alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
+loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath) {
+	loader_module_t *module = loader_getModule(ctemplate->modules, templatePath);
+	if ( ctemplate->alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
 		if ( module != NULL ) {
-			modules = loader_unloadModule(module);
+			ctemplate->modules = loader_unloadModule(module);
 		}
-		translation_processTemplate(templatePath->data, sourcePath->data, libraryPath->data);
-		modules = loader_loadModule(modules, libraryPath);
-		module = loader_getModule(modules, libraryPath);
+		translation_processTemplate(ctemplate->translation_modules, templatePath->data, sourcePath->data, libraryPath->data);
+		ctemplate->modules = loader_loadModule(ctemplate->modules, libraryPath);
+		module = loader_getModule(ctemplate->modules, libraryPath);
 	} else if ( module == NULL ) {
-		modules = loader_loadModule(modules, libraryPath);
-		module = loader_getModule(modules, libraryPath);
+		ctemplate->modules = loader_loadModule(ctemplate->modules, libraryPath);
+		module = loader_getModule(ctemplate->modules, libraryPath);
 	}
 	return module;
 }
 
-void ctemplate_destroy() {
-	while ( modules != NULL ) {
-		modules = loader_unloadModule(modules);
+void ctemplate_destroy(ctemplate_t *ctemplate) {
+	while ( ctemplate->modules != NULL ) {
+		ctemplate->modules = loader_unloadModule(ctemplate->modules);
 	}
-	safe_destroy(templateBaseDir);
-	safe_destroy(workingBaseDir);
-	expression_destroy();
-	modules_destroy();
+	safe_destroy(ctemplate->templateBaseDir);
+	safe_destroy(ctemplate->workingBaseDir);
+	modules_destroy(ctemplate->translation_modules);
+	free(ctemplate);
 }
 
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {
@@ -149,6 +146,3 @@ char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, ch
 	return result;
 }
 
-csafestring_t *ctemplate_getWorkingBaseDir() {
-	return workingBaseDir;
-}

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "modules.h"
 
 typedef enum e_pattern_type {
 	INT,
@@ -31,10 +32,8 @@ typedef struct {
 	bool hasOperator;
 } pattern_analyse_t;
 
-void expression_init();
-void expression_destroy();
+void expression_register(translation_module_t *modules);
+void expression_unregister(translation_module_t *modules);
 void expression_eval(char *line, FILE *out, bool returnString);
-void expression_unregister();
-void expression_register();
 
 #endif

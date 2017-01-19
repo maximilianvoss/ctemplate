@@ -1,6 +1,5 @@
 #include "cset.h"
 #include "expression.h"
-#include "modules.h"
 
 char *cset_openTag(char *line, FILE *out);
 char *cset_closeTag(char *line, FILE *out);
@@ -16,12 +15,12 @@ translation_module_t module_cset = {
 		.next = NULL
 };
 
-void cset_register() {
-	modules_register(&module_cset);
+void cset_register(translation_module_t *modules) {
+	modules_register(modules, &module_cset);
 }
 
-void cset_unregister() {
-	modules_unregister(&module_cset);
+void cset_unregister(translation_module_t *modules) {
+	modules_unregister(modules, &module_cset);
 }
 
 char *cset_openTag(char *line, FILE *out) {

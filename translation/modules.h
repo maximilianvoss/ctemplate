@@ -18,12 +18,12 @@ typedef struct s_translation_module {
 
 
 csafestring_t *modules_extractVariable(char *line, char *name);
-void modules_init();
-void modules_destroy();
-void *modules_matches(char *line);
+translation_module_t *modules_init();
+void modules_destroy(translation_module_t *modules);
+void *modules_matches(translation_module_t *modules, char *line);
 char *modules_execute(void *method, char *line, FILE *out);
-void modules_register(translation_module_t *module);
-void modules_unregister(translation_module_t *module);
+void modules_register(translation_module_t *modules, translation_module_t *module);
+void modules_unregister(translation_module_t *modules, translation_module_t *module);
 char *modules_findEndOfTag(char *line);
 char *modules_findEndOfElement(char *line, char chr);
 

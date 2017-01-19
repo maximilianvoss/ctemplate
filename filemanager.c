@@ -1,12 +1,11 @@
 #include "filemanager.h"
-#include "ctemplate.h"
 #include <sys/stat.h>
 #include <time.h>
 
 char *filemanager_getSuffix(char *path);
 
-csafestring_t *filemanager_calculateSourcePath(char *templateFile) {
-	csafestring_t *sourcePath = safe_clone(ctemplate_getWorkingBaseDir());
+csafestring_t *filemanager_calculateSourcePath(ctemplate_t *ctemplate, char *templateFile) {
+	csafestring_t *sourcePath = safe_clone(ctemplate->workingBaseDir);
 	safe_strcat(sourcePath, templateFile);
 
 	char *suffix = filemanager_getSuffix(sourcePath->data);
@@ -16,8 +15,8 @@ csafestring_t *filemanager_calculateSourcePath(char *templateFile) {
 	return sourcePath;
 }
 
-csafestring_t *filemanager_calculateCompilationPath(char *templateFile) {
-	csafestring_t *compilationPath = safe_clone(ctemplate_getWorkingBaseDir());
+csafestring_t *filemanager_calculateCompilationPath(ctemplate_t *ctemplate, char *templateFile) {
+	csafestring_t *compilationPath = safe_clone(ctemplate->workingBaseDir);
 	safe_strcat(compilationPath, templateFile);
 
 	char *suffix = filemanager_getSuffix(compilationPath->data);

@@ -1,6 +1,4 @@
 #include "cremove.h"
-#include "expression.h"
-#include "modules.h"
 
 char *cremove_openTag(char *line, FILE *out);
 char *cremove_closeTag(char *line, FILE *out);
@@ -16,12 +14,12 @@ translation_module_t module_cremove = {
 		.next = NULL
 };
 
-void cremove_register() {
-	modules_register(&module_cremove);
+void cremove_register(translation_module_t *modules) {
+	modules_register(modules, &module_cremove);
 }
 
-void cremove_unregister() {
-	modules_unregister(&module_cremove);
+void cremove_unregister(translation_module_t *modules) {
+	modules_unregister(modules, &module_cremove);
 }
 
 char *cremove_openTag(char *line, FILE *out) {

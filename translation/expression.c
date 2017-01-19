@@ -3,7 +3,6 @@
 #include <regex.h>
 #include "expression.h"
 #include "expression_builder.h"
-#include "modules.h"
 
 static char regexInitiated = 0;
 static regex_t regexInt;
@@ -33,15 +32,7 @@ translation_module_t module_expression = {
 		.next = NULL
 };
 
-void expression_register() {
-	modules_register(&module_expression);
-}
-
-void expression_unregister() {
-	modules_unregister(&module_expression);
-}
-
-void expression_init() {
+void expression_register(translation_module_t *modules) {
 	if ( !regexInitiated ) {
 		regcomp(&regexFloat, "^[ |\t]*([0-9]+\\.[0-9]+)", REG_EXTENDED);
 		regcomp(&regexInt, "^[ |\t]*([0-9]+)", REG_EXTENDED);
@@ -55,9 +46,11 @@ void expression_init() {
 		regcomp(&regexNot, "^[ |\t]*(not|!)", REG_EXTENDED);
 	}
 	regexInitiated = 1;
+	modules_register(modules, &module_expression);
 }
 
-void expression_destroy() {
+void expression_unregister(translation_module_t *modules) {
+	modules_unregister(modules, &module_expression);
 	regfree(&regexInt);
 	regfree(&regexFloat);
 	regfree(&regexString);
@@ -69,8 +62,6 @@ void expression_destroy() {
 }
 
 void expression_eval(char *valueIn, FILE *out, bool returnString) {
-	expression_init();
-
 	pattern_analyse_t analysation;
 	analysation.hasEquation = false;
 	analysation.hasFloat = false;

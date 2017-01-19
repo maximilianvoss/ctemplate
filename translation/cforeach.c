@@ -1,6 +1,4 @@
 #include "cforeach.h"
-#include "expression.h"
-#include "modules.h"
 
 char *cforeach_openTag(char *line, FILE *out);
 char *cforeach_closeTag(char *line, FILE *out);
@@ -16,12 +14,12 @@ translation_module_t module_cforeach = {
 		.next = NULL
 };
 
-void cforeach_register() {
-	modules_register(&module_cforeach);
+void cforeach_register(translation_module_t *modules) {
+	modules_register(modules, &module_cforeach);
 }
 
-void cforeach_unregister() {
-	modules_unregister(&module_cforeach);
+void cforeach_unregister(translation_module_t *modules) {
+	modules_unregister(modules, &module_cforeach);
 }
 
 char *cforeach_openTag(char *line, FILE *out) {
