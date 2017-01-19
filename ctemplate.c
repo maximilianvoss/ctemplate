@@ -47,8 +47,8 @@ char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char
 
 	filemanager_fileinfo *templateInfo = filemanager_getStatus(templatePath->data);
 	if ( filemanager_fileNotExists(templatePath->data) ) {
+		safe_destroy(templatePath);
 		free(templateInfo);
-		free(templatePath);
 		return NULL;
 	}
 	free(templateInfo);
