@@ -64,7 +64,6 @@ filemanager_time *filemanager_getModifiedDate(filemanager_fileinfo *fileinfo) {
 	return time;
 }
 
-// check if file exists
 char filemanager_fileNotExists(filemanager_fileinfo *fileinfo) {
-	return fileinfo->st_blocks == 0;
+	return ( !fileinfo->st_dev && !fileinfo->st_mode && !fileinfo->st_nlink && !fileinfo->st_uid && !fileinfo->st_gid && !fileinfo->st_size && !fileinfo->st_blocks && !fileinfo->st_blksize );
 }
