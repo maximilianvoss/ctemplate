@@ -12,6 +12,6 @@ csafestring_t *filemanager_calculateCompilationPath(ctemplate_t *ctemplate, char
 char *filemanager_getFilename(char *path);
 filemanager_fileinfo *filemanager_getStatus(char *path);
 filemanager_time* filemanager_getModifiedDate(filemanager_fileinfo *fileinfo);
-char filemanager_fileNotExists(filemanager_fileinfo *fileinfo);
+int filemanager_fileNotExists(char *filename);
 
 #endif

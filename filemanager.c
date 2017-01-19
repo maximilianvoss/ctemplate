@@ -64,6 +64,8 @@ filemanager_time *filemanager_getModifiedDate(filemanager_fileinfo *fileinfo) {
 	return time;
 }
 
-char filemanager_fileNotExists(filemanager_fileinfo *fileinfo) {
-	return ( !fileinfo->st_dev && !fileinfo->st_mode && !fileinfo->st_nlink && !fileinfo->st_uid && !fileinfo->st_gid && !fileinfo->st_size && !fileinfo->st_blocks && !fileinfo->st_blksize );
+
+int filemanager_fileNotExists(char *filename) {
+	struct stat buffer;
+	return !( stat(filename, &buffer) == 0 );
 }

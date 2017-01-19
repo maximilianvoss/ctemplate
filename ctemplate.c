@@ -46,7 +46,7 @@ char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char
 	safe_strcat(templatePath, templateName);
 
 	filemanager_fileinfo *templateInfo = filemanager_getStatus(templatePath->data);
-	if ( filemanager_fileNotExists(filemanager_getStatus(templatePath->data)) ) {
+	if ( filemanager_fileNotExists(templatePath->data) ) {
 		free(templateInfo);
 		return NULL;
 	}
@@ -118,17 +118,13 @@ void ctemplate_destroy(ctemplate_t *ctemplate) {
 }
 
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {
+	if ( filemanager_fileNotExists(sourcePath) || filemanager_fileNotExists(libraryPath) ) {
+		return 1;
+	}
 
 	filemanager_fileinfo *fileInfoTemplate = filemanager_getStatus(templatePath);
 	filemanager_fileinfo *fileInfoSource = filemanager_getStatus(sourcePath);
 	filemanager_fileinfo *fileInfoLibrary = filemanager_getStatus(libraryPath);
-
-	if ( filemanager_fileNotExists(fileInfoSource) || filemanager_fileNotExists(fileInfoLibrary) ) {
-		free(fileInfoTemplate);
-		free(fileInfoSource);
-		free(fileInfoLibrary);
-		return 1;
-	}
 
 	filemanager_time *timeTemplate = filemanager_getModifiedDate(fileInfoTemplate);
 	filemanager_time *timeSource = filemanager_getModifiedDate(fileInfoSource);
