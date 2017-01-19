@@ -1,0 +1,60 @@
+#include "cforeach.h"
+#include "expression.h"
+#include "modules.h"
+
+char *cforeach_openTag(char *line, FILE *out);
+char *cforeach_closeTag(char *line, FILE *out);
+
+translation_module_t module_cforeach = {
+		.tagOpen = "<c:forEach",
+		.tagOpenLen = 10,
+		.tagClose = "</c:forEach",
+		.tagCloseLen = 11,
+		.functionOpen = cforeach_openTag,
+		.functionClose = cforeach_closeTag,
+		.data = NULL,
+		.next = NULL
+};
+
+void cforeach_register() {
+	modules_register(&module_cforeach);
+}
+
+void cforeach_unregister() {
+	modules_unregister(&module_cforeach);
+}
+
+char *cforeach_openTag(char *line, FILE *out) {
+	csafestring_t *var = modules_extractVariable(line, "var");
+	csafestring_t *begin = modules_extractVariable(line, "begin");
+	csafestring_t *end = modules_extractVariable(line, "end");
+	csafestring_t *step = modules_extractVariable(line, "step");
+
+	if ( var == NULL || begin == NULL || end == NULL ) {
+		safe_destroy(var);
+		safe_destroy(begin);
+		safe_destroy(end);
+		safe_destroy(step);
+		return modules_findEndOfTag(line) + 1;
+	}
+
+	fprintf(out, "for ( int %s = %s; %s <= %s; ", var->data, begin->data, var->data, end->data);
+	if ( step == NULL ) {
+		fprintf(out, "%s++) {\n", var->data);
+	} else {
+		fprintf(out, "%s+=%s) {\n", var->data, step->data);
+	}
+	fprintf(out, "snprintf(expressionString, 255, \"%s\", %s);\n", "%d", var->data);
+	fprintf(out, "mfunction->set(data, \"%s\", expressionString);\n", var->data);
+
+	safe_destroy(var);
+	safe_destroy(begin);
+	safe_destroy(end);
+	safe_destroy(step);
+	return modules_findEndOfTag(line) + 1;
+}
+
+char *cforeach_closeTag(char *line, FILE *out) {
+	fprintf(out, "}\n");
+	return modules_findEndOfTag(line) + 1;
+}

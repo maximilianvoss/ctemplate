@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <regex.h>
 #include "expression.h"
-#include "builder.h"
+#include "expression_builder.h"
+#include "modules.h"
 
 static char regexInitiated = 0;
 static regex_t regexInt;
@@ -18,6 +19,27 @@ static regex_t regexNot;
 
 void expression_free(pattern_match_t *matches);
 pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation);
+char *expression_functionExpression(char *line, FILE *out);
+char *expression_findEndOfExpression(char *line);
+
+translation_module_t module_expression = {
+		.tagOpen = "${",
+		.tagOpenLen = 2,
+		.tagClose = NULL,
+		.tagCloseLen = 0,
+		.functionOpen = expression_functionExpression,
+		.functionClose = NULL,
+		.data = NULL,
+		.next = NULL
+};
+
+void expression_register() {
+	modules_register(&module_expression);
+}
+
+void expression_unregister() {
+	modules_unregister(&module_expression);
+}
 
 void expression_init() {
 	if ( !regexInitiated ) {
@@ -146,3 +168,14 @@ pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation
 	return matches;
 }
 
+char *expression_findEndOfExpression(char *line) {
+	return modules_findEndOfElement(line, '}');
+}
+
+char *expression_functionExpression(char *line, FILE *out) {
+	char *endOfExpression = expression_findEndOfExpression(line);
+	fprintf(out, "safe_strcat(string, ");
+	expression_eval(line, out, true);
+	fprintf(out, ");\n");
+	return endOfExpression + 1;
+}

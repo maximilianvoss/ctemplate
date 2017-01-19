@@ -14,7 +14,7 @@ typedef struct {
 
 void ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, char recompile);
 char *ctemplate_executeTemplate(char *templateName, char *json);
-void ctemplate_unload();
+void ctemplate_destroy();
 csafestring_t *ctemplate_getWorkingBaseDir();
 
 #endif

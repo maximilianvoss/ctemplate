@@ -4,7 +4,8 @@
 #include "loader.h"
 #include "date.h"
 #include "translation.h"
-#include "expression.h"
+#include "translation/expression.h"
+#include "translation/modules.h"
 
 void *ctemplate_parseJson(char *json);
 char *ctemplate_executeModule(loader_module_t *module, char *json);
@@ -19,6 +20,7 @@ static ctemplate_functions_t *mfunctions;
 
 void ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, char recompile) {
 	expression_init();
+	modules_init();
 	templateBaseDir = safe_create(templatePath);
 	if ( !safe_strcmp(templateBaseDir, "") ) {
 		safe_strcpy(templateBaseDir, "./");
@@ -108,13 +110,14 @@ loader_module_t *ctemplate_moduleLoader(csafestring_t *templatePath, csafestring
 	return module;
 }
 
-void ctemplate_unload() {
+void ctemplate_destroy() {
 	while ( modules != NULL ) {
 		modules = loader_unloadModule(modules);
 	}
 	safe_destroy(templateBaseDir);
 	safe_destroy(workingBaseDir);
 	expression_destroy();
+	modules_destroy();
 }
 
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {

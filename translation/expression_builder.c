@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "builder.h"
+#include "expression_builder.h"
 
 pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation);
 bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);

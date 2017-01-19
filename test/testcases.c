@@ -113,6 +113,6 @@ int main(int argc, char **argv) {
 	TESTCALL("test_cchoose", test_cchoose);
 	TESTCALL("test_cforeach", test_cforeach);
 
-	ctemplate_unload();
+	ctemplate_destroy();
 	return -1;
 }

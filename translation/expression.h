@@ -34,5 +34,7 @@ typedef struct {
 void expression_init();
 void expression_destroy();
 void expression_eval(char *line, FILE *out, bool returnString);
+void expression_unregister();
+void expression_register();
 
 #endif

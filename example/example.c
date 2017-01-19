@@ -17,6 +17,6 @@ int main(int argc, char **argv) {
 
 	ctemplate_init(EXAMPLEPATH, NULL, &methods, 1);
 	printf("%s\n", ctemplate_executeTemplate("template.html", "{\"variable\":\"value\"}"));
-	ctemplate_unload();
+	ctemplate_destroy();
 	return 0;
 }
