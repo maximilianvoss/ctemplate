@@ -2,18 +2,16 @@
 #define CTEMPLATE_LOADER_H
 
 #include <csafestring.h>
-#include "ctemplate.h"
+#include "functions.h"
 
-struct loader_module_s {
+typedef struct s_loader_module {
 	csafestring_t *path;
 	void *handle;
 	void (*method)(csafestring_t *, ctemplate_functions_t *, void *);
 
-	struct loader_module_s *next;
-	struct loader_module_s *prev;
-};
-
-typedef struct loader_module_s loader_module_t;
+	struct s_loader_module *next;
+	struct s_loader_module *prev;
+} loader_module_t;
 
 loader_module_t *loader_getModule(loader_module_t *modules, csafestring_t *modulePath);
 loader_module_t *loader_loadModule(loader_module_t *modules, csafestring_t *modulePath);

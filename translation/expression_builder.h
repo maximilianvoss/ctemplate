@@ -1,5 +1,5 @@
-#ifndef CTEMPLATE_BUILDER_H
-#define CTEMPLATE_BUILDER_H
+#ifndef CTEMPLATE_EXPRESSION_BUILDER_H
+#define CTEMPLATE_EXPRESSION_BUILDER_H
 
 #include "expression.h"
 #include <stdbool.h>

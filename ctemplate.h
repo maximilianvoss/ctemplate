@@ -2,19 +2,22 @@
 #define CTEMPLATE_CTEMPLATE_H
 
 #include <csafestring.h>
+#include <stdbool.h>
+#include "functions.h"
+#include "loader.h"
+#include "translation/modules.h"
 
 typedef struct {
-	void *(*createMap)();
-	void (*destroyMap)(void *map);
-	char *(*get)(void *map, char *key);
-	void (*set)(void *map, char *key, char *value);
-	void (*unset)(void *map, char *key);
-	char *(*find)(void *map, char *pattern);
-} ctemplate_functions_t;
+	loader_module_t *modules;
+	csafestring_t *templateBaseDir;
+	csafestring_t *workingBaseDir;
+	bool alwaysRecompile;
+	ctemplate_functions_t *mfunctions;
+	translation_module_t *translation_modules;
+} ctemplate_t;
 
-void ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, char recompile);
-char *ctemplate_executeTemplate(char *templateName, char *json);
-void ctemplate_unload();
-csafestring_t *ctemplate_getWorkingBaseDir();
+ctemplate_t *ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, bool recompile);
+char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char *json);
+void ctemplate_destroy(ctemplate_t *ctemplate);
 
 #endif
