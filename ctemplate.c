@@ -71,7 +71,7 @@ char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, c
 	csafestring_t *output = safe_create(NULL);
 	void *data = ctemplate_parseJson(ctemplate, json);
 
-	module->method(output, ctemplate->mfunctions, data);
+	module->method(output, ctemplate->mfunctions, data, NULL);
 
 	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
 	memcpy (retVal, output->data, output->buffer_length);

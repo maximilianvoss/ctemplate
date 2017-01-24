@@ -30,7 +30,7 @@ char *cremove_openTag(char *line, FILE *out) {
 		return modules_findEndOfTag(line) + 1;
 	}
 
-	fprintf(out, "mfunction->unset(data, \"%s\");\n", var->data);
+	fprintf(out, "__internal_mfunction->unset(__internal_data, \"%s\");\n", var->data);
 
 	safe_destroy(var);
 	return modules_findEndOfTag(line) + 1;

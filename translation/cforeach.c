@@ -42,8 +42,8 @@ char *cforeach_openTag(char *line, FILE *out) {
 	} else {
 		fprintf(out, "%s+=%s) {\n", var->data, step->data);
 	}
-	fprintf(out, "snprintf(expressionString, 255, \"%s\", %s);\n", "%d", var->data);
-	fprintf(out, "mfunction->set(data, \"%s\", expressionString);\n", var->data);
+	fprintf(out, "snprintf(__internal_expressionString, 255, \"%s\", %s);\n", "%d", var->data);
+	fprintf(out, "__internal_mfunction->set(__internal_data, \"%s\", __internal_expressionString);\n", var->data);
 
 	safe_destroy(var);
 	safe_destroy(begin);

@@ -34,11 +34,11 @@ char *cset_openTag(char *line, FILE *out) {
 	}
 
 	if ( !safe_strncmp(value, "${", 2) ) {
-		fprintf(out, "mfunction->set(data, \"%s\", ", var->data);
+		fprintf(out, "__internal_mfunction->set(__internal_data, \"%s\", ", var->data);
 		expression_eval(value->data, out, true);
 		fprintf(out, ");\n");
 	} else {
-		fprintf(out, "mfunction->set(data, \"%s\", \"%s\");\n", var->data, value->data);
+		fprintf(out, "__internal_mfunction->set(__internal_data, \"%s\", \"%s\");\n", var->data, value->data);
 	}
 
 	safe_destroy(value);

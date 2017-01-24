@@ -165,7 +165,7 @@ char *expression_findEndOfExpression(char *line) {
 
 char *expression_functionExpression(char *line, FILE *out) {
 	char *endOfExpression = expression_findEndOfExpression(line);
-	fprintf(out, "safe_strcat(string, ");
+	fprintf(out, "safe_strcat(__internal_string, ");
 	expression_eval(line, out, true);
 	fprintf(out, ");\n");
 	return endOfExpression + 1;
