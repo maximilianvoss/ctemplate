@@ -8,6 +8,7 @@ typedef struct {
 	void (*set)(void *map, char *key, char *value);
 	void (*unset)(void *map, char *key);
 	char *(*find)(void *map, char *pattern);
+	void (*parseJson)(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);
 } ctemplate_functions_t;
 
 #endif

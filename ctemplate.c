@@ -4,7 +4,7 @@
 #include "date.h"
 #include "translation.h"
 
-void *ctemplate_parseJson(ctemplate_t *ctemplate, char *json);
+void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);
 char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json);
 char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
 loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
@@ -32,6 +32,7 @@ ctemplate_t *ctemplate_init(char *templatePath, char *workingPath, ctemplate_fun
 	ctemplate->alwaysRecompile = recompile;
 	ctemplate->modules = NULL;
 	ctemplate->translation_modules = modules_init();
+	ctemplate->mfunctions->parseJson = ctemplate_parseJson;
 
 	return ctemplate;
 }
@@ -69,9 +70,7 @@ char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char
 
 char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json) {
 	csafestring_t *output = safe_create(NULL);
-	void *data = ctemplate_parseJson(ctemplate, json);
-
-	module->method(output, ctemplate->mfunctions, data, NULL);
+	module->method(output, ctemplate->mfunctions, json);
 
 	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
 	memcpy (retVal, output->data, output->buffer_length);
@@ -80,15 +79,12 @@ char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, c
 	return retVal;
 }
 
-void *ctemplate_parseJson(ctemplate_t *ctemplate, char *json) {
-	void *data = ctemplate->mfunctions->createMap();
-
+void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json) {
 	json2map_t *json2mapObj = json2map_init();
-	json2map_registerDataHook(json2mapObj, data, ctemplate->mfunctions->set);
+	json2map_registerDataHook(json2mapObj, data, set);
+	json2map_registerObjectHook(json2mapObj, objects, set);
 	json2map_parse(json2mapObj, json);
 	json2map_destroy(json2mapObj);
-
-	return data;
 }
 
 

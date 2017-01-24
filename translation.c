@@ -36,6 +36,7 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "	void (* set) (void *map, char *key, char *value);\n");
 	fprintf(file, "void (*unset)(void *map, char *key);\n");
 	fprintf(file, "	char * (* find) (void *map, char *pattern);\n");
+	fprintf(file, " void (*parseJson)(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);\n");
 	fprintf(file, "} ctemplate_functions_t;\n\n");
 	fprintf(file, "char *__internal_floatToString(char *str, size_t size, float expr ) {\n");
 	fprintf(file, "snprintf(str, size, \"%s\", expr);\n", "%f");
@@ -46,9 +47,12 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "return str;\n");
 	fprintf(file, "}\n");
 
-	fprintf(file, "void execute(csafestring_t *__internal_string, ctemplate_functions_t *__internal_mfunction, void *__internal_data, void *__internal_objects) {\n");
+	fprintf(file, "void execute(csafestring_t *__internal_string, ctemplate_functions_t *__internal_mfunction, char *__internal_jsonString) {\n");
+	fprintf(file, "void *__internal_data = __internal_mfunction->createMap();\n");
+	fprintf(file, "void *__internal_objects = __internal_mfunction->createMap();\n");
 	fprintf(file, "char __internal_expressionString[255];\n");
 	fprintf(file, "char *__internal_tmp;\n");
+	fprintf(file, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_data, __internal_objects, __internal_jsonString);\n");
 }
 
 void translation_processLine(translation_module_t *translation_modules, FILE *out, char *line) {
