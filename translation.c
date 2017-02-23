@@ -1,4 +1,5 @@
 #include "translation.h"
+#include "translation/variable_handler.h"
 
 #define BUFFER_SIZE 4096
 
@@ -48,11 +49,12 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "}\n");
 
 	fprintf(file, "void execute(csafestring_t *__internal_string, ctemplate_functions_t *__internal_mfunction, char *__internal_jsonString) {\n");
-	fprintf(file, "void *__internal_data = __internal_mfunction->createMap();\n");
-	fprintf(file, "void *__internal_objects = __internal_mfunction->createMap();\n");
+	fprintf(file, "void *__internal_%sValues = __internal_mfunction->createMap();\n", VARIABLE_HANDLER_MAP_NOT_SET);
+	fprintf(file, "void *__internal_requestValues = __internal_mfunction->createMap();\n");
+	fprintf(file, "void *__internal_requestObjects = __internal_mfunction->createMap();\n");
 	fprintf(file, "char __internal_expressionString[255];\n");
 	fprintf(file, "char *__internal_tmp;\n");
-	fprintf(file, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_data, __internal_objects, __internal_jsonString);\n");
+	fprintf(file, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_requestValues, __internal_requestObjects, __internal_jsonString);\n");
 }
 
 void translation_processLine(translation_module_t *translation_modules, FILE *out, char *line) {
@@ -103,8 +105,9 @@ void translation_processLine(translation_module_t *translation_modules, FILE *ou
 }
 
 void translation_closeSourceFile(FILE *file) {
-	fprintf(file, "__internal_mfunction->destroyMap(__internal_data);\n");
-	fprintf(file, "__internal_mfunction->destroyMap(__internal_objects);\n");
+	fprintf(file, "__internal_mfunction->destroyMap(__internal_%sValues);\n", VARIABLE_HANDLER_MAP_NOT_SET);
+	fprintf(file, "__internal_mfunction->destroyMap(__internal_requestValues);\n");
+	fprintf(file, "__internal_mfunction->destroyMap(__internal_requestObjects);\n");
 	fprintf(file, "}\n");
 	fclose(file);
 }

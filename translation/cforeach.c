@@ -1,4 +1,5 @@
 #include "cforeach.h"
+#include "variable_handler.h"
 
 char *cforeach_openTag(char *line, FILE *out);
 char *cforeach_closeTag(char *line, FILE *out);
@@ -43,7 +44,7 @@ char *cforeach_openTag(char *line, FILE *out) {
 		fprintf(out, "%s+=%s) {\n", var->data, step->data);
 	}
 	fprintf(out, "snprintf(__internal_expressionString, 255, \"%s\", %s);\n", "%d", var->data);
-	fprintf(out, "__internal_mfunction->set(__internal_data, \"%s\", __internal_expressionString);\n", var->data);
+	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_expressionString);\n", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
 
 	safe_destroy(var);
 	safe_destroy(begin);

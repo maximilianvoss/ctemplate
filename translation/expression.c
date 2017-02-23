@@ -37,7 +37,7 @@ void expression_register(translation_module_t *modules) {
 		regcomp(&regexFloat, "^[ |\t]*([0-9]+\\.[0-9]+)", REG_EXTENDED);
 		regcomp(&regexInt, "^[ |\t]*([0-9]+)", REG_EXTENDED);
 		regcomp(&regexString, "^[ |\t]*[\"|\'](.*)[\"|\']", REG_EXTENDED);
-		regcomp(&regexVariable, "^[ |\t]*([a-zA-Z][a-zA-Z0-9]*)", REG_EXTENDED);
+		regcomp(&regexVariable, "^[ |\t]*([a-zA-Z][a-zA-Z0-9\\.]*)", REG_EXTENDED);
 		regcomp(&regexEquation, "^[ |\t]*(eq|ne|==|!=|<=|>=|>|<)", REG_EXTENDED);
 		regcomp(&regexOperator, "^[ |\t]*([\\+|*|-|/])", REG_EXTENDED);
 		regcomp(&regexEmpty, "^[ |\t]*$", REG_EXTENDED);

@@ -8,7 +8,7 @@ set(SOURCE_FILES
         expression_builder.c
         expression_builder.h
         expression.c
-        expression.h cset.c cset.h cout.c cout.h cremove.c cremove.h cchoose.c cchoose.h cforeach.c cforeach.h)
+        expression.h cset.c cset.h cout.c cout.h cremove.c cremove.h cchoose.c cchoose.h cforeach.c cforeach.h variable_handler.c variable_handler.h)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 

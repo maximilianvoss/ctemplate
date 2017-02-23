@@ -1,4 +1,6 @@
+#include <csafestring.h>
 #include "cremove.h"
+#include "variable_handler.h"
 
 char *cremove_openTag(char *line, FILE *out);
 char *cremove_closeTag(char *line, FILE *out);
@@ -30,7 +32,9 @@ char *cremove_openTag(char *line, FILE *out) {
 		return modules_findEndOfTag(line) + 1;
 	}
 
-	fprintf(out, "__internal_mfunction->unset(__internal_data, \"%s\");\n", var->data);
+	handler_variable_t *varhandler = varhandler_create(var->data);
+	fprintf(out, "__internal_mfunction->unset(__internal_%sValues, \"%s\");\n", varhandler->mapName->data, varhandler->variableName->data);
+	varhandler_destroy(varhandler);
 
 	safe_destroy(var);
 	return modules_findEndOfTag(line) + 1;
