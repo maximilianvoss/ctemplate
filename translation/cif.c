@@ -1,10 +1,10 @@
 #include "cif.h"
 #include "expression.h"
 
-char *cif_openTag(char *line, FILE *out);
-char *cif_closeTag(char *line, FILE *out);
+static char *cif_openTag(char *line, FILE *out);
+static char *cif_closeTag(char *line, FILE *out);
 
-translation_module_t module_cif = {
+static translation_module_t module_cif = {
 		.tagOpen = "<c:if",
 		.tagOpenLen = 5,
 		.tagClose = "</c:if",
@@ -23,7 +23,7 @@ void cif_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cif);
 }
 
-char *cif_openTag(char *line, FILE *out) {
+static char *cif_openTag(char *line, FILE *out) {
 	csafestring_t *test = modules_extractVariable(line, "test");
 
 	if ( test == NULL ) {
@@ -43,7 +43,7 @@ char *cif_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cif_closeTag(char *line, FILE *out) {
+static char *cif_closeTag(char *line, FILE *out) {
 	fprintf(out, "}\n");
 	return modules_findEndOfTag(line) + 1;
 }

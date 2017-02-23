@@ -2,10 +2,10 @@
 #include "cremove.h"
 #include "variable_handler.h"
 
-char *cremove_openTag(char *line, FILE *out);
-char *cremove_closeTag(char *line, FILE *out);
+static char *cremove_openTag(char *line, FILE *out);
+static char *cremove_closeTag(char *line, FILE *out);
 
-translation_module_t module_cremove = {
+static translation_module_t module_cremove = {
 		.tagOpen = "<c:remove",
 		.tagOpenLen = 9,
 		.tagClose = "</c:remove",
@@ -24,7 +24,7 @@ void cremove_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cremove);
 }
 
-char *cremove_openTag(char *line, FILE *out) {
+static char *cremove_openTag(char *line, FILE *out) {
 	csafestring_t *var = modules_extractVariable(line, "var");
 
 	if ( var == NULL ) {
@@ -40,6 +40,6 @@ char *cremove_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cremove_closeTag(char *line, FILE *out) {
+static char *cremove_closeTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }

@@ -1,14 +1,14 @@
 #include "cchoose.h"
 #include "expression.h"
 
-char *cchoose_openTag(char *line, FILE *out);
-char *cchoose_closeTag(char *line, FILE *out);
-char *cwhen_openTag(char *line, FILE *out);
-char *cwhen_closeTag(char *line, FILE *out);
-char *cotherwise_openTag(char *line, FILE *out);
-char *cotherwise_closeTag(char *line, FILE *out);
+static char *cchoose_openTag(char *line, FILE *out);
+static char *cchoose_closeTag(char *line, FILE *out);
+static char *cwhen_openTag(char *line, FILE *out);
+static char *cwhen_closeTag(char *line, FILE *out);
+static char *cotherwise_openTag(char *line, FILE *out);
+static char *cotherwise_closeTag(char *line, FILE *out);
 
-translation_module_t module_cchoose = {
+static translation_module_t module_cchoose = {
 		.tagOpen = "<c:choose",
 		.tagOpenLen = 9,
 		.tagClose = "</c:choose",
@@ -19,7 +19,7 @@ translation_module_t module_cchoose = {
 		.next = NULL
 };
 
-translation_module_t module_cwhen = {
+static translation_module_t module_cwhen = {
 		.tagOpen = "<c:when",
 		.tagOpenLen = 7,
 		.tagClose = "</c:when",
@@ -30,7 +30,7 @@ translation_module_t module_cwhen = {
 		.next = NULL
 };
 
-translation_module_t module_cotherwise = {
+static translation_module_t module_cotherwise = {
 		.tagOpen = "<c:otherwise",
 		.tagOpenLen = 12,
 		.tagClose = "</c:otherwise",
@@ -57,17 +57,17 @@ void cchoose_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cotherwise);
 }
 
-char *cchoose_openTag(char *line, FILE *out) {
+static char *cchoose_openTag(char *line, FILE *out) {
 	bool *data = (bool *) module_cchoose.data;
 	*data = true;
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cchoose_closeTag(char *line, FILE *out) {
+static char *cchoose_closeTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cwhen_openTag(char *line, FILE *out) {
+static char *cwhen_openTag(char *line, FILE *out) {
 	csafestring_t *test = modules_extractVariable(line, "test");
 	bool *data = (bool *) module_cchoose.data;
 
@@ -93,17 +93,17 @@ char *cwhen_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cwhen_closeTag(char *line, FILE *out) {
+static char *cwhen_closeTag(char *line, FILE *out) {
 	fprintf(out, "}\n");
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cotherwise_openTag(char *line, FILE *out) {
+static char *cotherwise_openTag(char *line, FILE *out) {
 	fprintf(out, "else {\n");
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cotherwise_closeTag(char *line, FILE *out) {
+static char *cotherwise_closeTag(char *line, FILE *out) {
 	fprintf(out, "}\n");
 	return modules_findEndOfTag(line) + 1;
 }

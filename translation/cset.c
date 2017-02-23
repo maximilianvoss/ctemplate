@@ -3,10 +3,10 @@
 #include "expression.h"
 #include "variable_handler.h"
 
-char *cset_openTag(char *line, FILE *out);
-char *cset_closeTag(char *line, FILE *out);
+static char *cset_openTag(char *line, FILE *out);
+static char *cset_closeTag(char *line, FILE *out);
 
-translation_module_t module_cset = {
+static translation_module_t module_cset = {
 		.tagOpen = "<c:set",
 		.tagOpenLen = 6,
 		.tagClose = "</c:set",
@@ -25,7 +25,7 @@ void cset_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cset);
 }
 
-char *cset_openTag(char *line, FILE *out) {
+static char *cset_openTag(char *line, FILE *out) {
 	csafestring_t *value = modules_extractVariable(line, "value");
 	csafestring_t *var = modules_extractVariable(line, "var");
 
@@ -50,6 +50,6 @@ char *cset_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cset_closeTag(char *line, FILE *out) {
+static char *cset_closeTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }

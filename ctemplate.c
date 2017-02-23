@@ -4,10 +4,10 @@
 #include "date.h"
 #include "translation.h"
 
-void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);
-char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json);
-char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
-loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
+static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);
+static char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json);
+static char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
+static loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
 
 ctemplate_t *ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, bool recompile) {
 
@@ -68,7 +68,7 @@ char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char
 	return retVal;
 }
 
-char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json) {
+static char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json) {
 	csafestring_t *output = safe_create(NULL);
 	module->method(output, ctemplate->mfunctions, json);
 
@@ -79,7 +79,7 @@ char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, c
 	return retVal;
 }
 
-void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json) {
+static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json) {
 	json2map_t *json2mapObj = json2map_init();
 	json2map_registerDataHook(json2mapObj, data, set);
 	json2map_registerObjectHook(json2mapObj, objects, set);
@@ -88,7 +88,7 @@ void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *d
 }
 
 
-loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath) {
+static loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath) {
 	loader_module_t *module = loader_getModule(ctemplate->modules, templatePath);
 	if ( ctemplate->alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
 		if ( module != NULL ) {
@@ -114,7 +114,7 @@ void ctemplate_destroy(ctemplate_t *ctemplate) {
 	free(ctemplate);
 }
 
-char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {
+static char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath) {
 	if ( filemanager_fileNotExists(sourcePath) || filemanager_fileNotExists(libraryPath) ) {
 		return 1;
 	}

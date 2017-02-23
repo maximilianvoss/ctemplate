@@ -7,8 +7,6 @@
 #include "cchoose.h"
 #include "expression.h"
 
-char *modules_findEndOfTag(char *line);
-
 csafestring_t *modules_extractVariable(char *line, char *name) {
 	csafestring_t *searchStr = safe_create(name);
 	safe_strchrappend(searchStr, '=');

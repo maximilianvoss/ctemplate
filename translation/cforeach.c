@@ -1,10 +1,10 @@
 #include "cforeach.h"
 #include "variable_handler.h"
 
-char *cforeach_openTag(char *line, FILE *out);
-char *cforeach_closeTag(char *line, FILE *out);
+static char *cforeach_openTag(char *line, FILE *out);
+static char *cforeach_closeTag(char *line, FILE *out);
 
-translation_module_t module_cforeach = {
+static translation_module_t module_cforeach = {
 		.tagOpen = "<c:forEach",
 		.tagOpenLen = 10,
 		.tagClose = "</c:forEach",
@@ -23,7 +23,7 @@ void cforeach_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cforeach);
 }
 
-char *cforeach_openTag(char *line, FILE *out) {
+static char *cforeach_openTag(char *line, FILE *out) {
 	csafestring_t *var = modules_extractVariable(line, "var");
 	csafestring_t *begin = modules_extractVariable(line, "begin");
 	csafestring_t *end = modules_extractVariable(line, "end");
@@ -53,7 +53,7 @@ char *cforeach_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cforeach_closeTag(char *line, FILE *out) {
+static char *cforeach_closeTag(char *line, FILE *out) {
 	fprintf(out, "}\n");
 	return modules_findEndOfTag(line) + 1;
 }

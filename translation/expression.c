@@ -16,12 +16,12 @@ static regex_t regexPopen;
 static regex_t regexPclose;
 static regex_t regexNot;
 
-void expression_free(pattern_match_t *matches);
-pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation);
-char *expression_functionExpression(char *line, FILE *out);
-char *expression_findEndOfExpression(char *line);
+static void expression_free(pattern_match_t *matches);
+static pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation);
+static char *expression_functionExpression(char *line, FILE *out);
+static char *expression_findEndOfExpression(char *line);
 
-translation_module_t module_expression = {
+static translation_module_t module_expression = {
 		.tagOpen = "${",
 		.tagOpenLen = 2,
 		.tagClose = NULL,
@@ -86,7 +86,7 @@ void expression_eval(char *valueIn, FILE *out, bool returnString) {
 	}
 }
 
-void expression_free(pattern_match_t *matches) {
+static void expression_free(pattern_match_t *matches) {
 	if ( matches == NULL ) {
 		return;
 	}
@@ -95,7 +95,7 @@ void expression_free(pattern_match_t *matches) {
 	free(matches);
 }
 
-pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation) {
+static pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation) {
 	regmatch_t match[2];
 	pattern_match_t *matches = NULL;
 	pattern_match_t *lastMatch = NULL;
@@ -159,11 +159,11 @@ pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation
 	return matches;
 }
 
-char *expression_findEndOfExpression(char *line) {
+static char *expression_findEndOfExpression(char *line) {
 	return modules_findEndOfElement(line, '}');
 }
 
-char *expression_functionExpression(char *line, FILE *out) {
+static char *expression_functionExpression(char *line, FILE *out) {
 	char *endOfExpression = expression_findEndOfExpression(line);
 	fprintf(out, "safe_strcat(__internal_string, ");
 	expression_eval(line, out, true);

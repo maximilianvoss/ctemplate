@@ -4,10 +4,10 @@
 #include "expression_builder.h"
 #include "variable_handler.h"
 
-pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation);
-bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
+static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation);
+static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
 
-bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
+static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 	if ( matches->type == VARIABLE || matches->type == STRING ) {
 		if ( matches->next != NULL && matches->next->type == EQUATION && matches->next->next != NULL && ( matches->next->next->type == STRING || matches->next->next->type == VARIABLE ) ) {
 			handler_variable_t *varhandler = varhandler_create(matches->string);
@@ -48,7 +48,7 @@ bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 	return false;
 }
 
-pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation) {
+static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation) {
 	if ( matches->type == VARIABLE ) {
 		handler_variable_t *varhandler = varhandler_create(matches->string);
 		if ( !analysation->hasFloat && !analysation->hasInt && !analysation->hasOperator ) {

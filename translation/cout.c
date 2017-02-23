@@ -1,10 +1,10 @@
 #include "cout.h"
 #include "expression.h"
 
-char *cout_openTag(char *line, FILE *out);
-char *cout_closeTag(char *line, FILE *out);
+static char *cout_openTag(char *line, FILE *out);
+static char *cout_closeTag(char *line, FILE *out);
 
-translation_module_t module_cout = {
+static translation_module_t module_cout = {
 		.tagOpen = "<c:out",
 		.tagOpenLen = 6,
 		.tagClose = "</c:out",
@@ -23,7 +23,7 @@ void cout_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cout);
 }
 
-char *cout_openTag(char *line, FILE *out) {
+static char *cout_openTag(char *line, FILE *out) {
 	csafestring_t *value = modules_extractVariable(line, "value");
 	csafestring_t *defaultValue = modules_extractVariable(line, "default");
 
@@ -47,6 +47,6 @@ char *cout_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cout_closeTag(char *line, FILE *out) {
+static char *cout_closeTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }

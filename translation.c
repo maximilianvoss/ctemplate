@@ -1,13 +1,12 @@
 #include "translation.h"
 #include "translation/variable_handler.h"
+#include "compiler.h"
 
 #define BUFFER_SIZE 4096
 
-csafestring_t *modules_extractVariable(char *line, char *name);
-void translation_processLine(translation_module_t *translation_modules, FILE *out, char *line);
-void translation_createSourceHeader(FILE *file);
-void translation_closeSourceFile(FILE *file);
-void compiler_compileCode(char *sourcePath, char *libraryPath);
+static void translation_processLine(translation_module_t *translation_modules, FILE *out, char *line);
+static void translation_createSourceHeader(FILE *file);
+static void translation_closeSourceFile(FILE *file);
 
 void translation_processTemplate(translation_module_t *translation_modules, char *templatePath, char *sourcePath, char *libraryPath) {
 	char buffer[BUFFER_SIZE + 1];
@@ -27,7 +26,7 @@ void translation_processTemplate(translation_module_t *translation_modules, char
 	compiler_compileCode(sourcePath, libraryPath);
 }
 
-void translation_createSourceHeader(FILE *file) {
+static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "#include <csafestring.h>\n");
 	fprintf(file, "#include <stdio.h>\n");
 	fprintf(file, "typedef struct {\n");
@@ -57,7 +56,7 @@ void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_requestValues, __internal_requestObjects, __internal_jsonString);\n");
 }
 
-void translation_processLine(translation_module_t *translation_modules, FILE *out, char *line) {
+static void translation_processLine(translation_module_t *translation_modules, FILE *out, char *line) {
 	char buffer[BUFFER_SIZE + 1];
 	memset(buffer, '\0', BUFFER_SIZE + 1);
 	void *method;
@@ -104,7 +103,7 @@ void translation_processLine(translation_module_t *translation_modules, FILE *ou
 	}
 }
 
-void translation_closeSourceFile(FILE *file) {
+static void translation_closeSourceFile(FILE *file) {
 	fprintf(file, "__internal_mfunction->destroyMap(__internal_%sValues);\n", VARIABLE_HANDLER_MAP_NOT_SET);
 	fprintf(file, "__internal_mfunction->destroyMap(__internal_requestValues);\n");
 	fprintf(file, "__internal_mfunction->destroyMap(__internal_requestObjects);\n");
