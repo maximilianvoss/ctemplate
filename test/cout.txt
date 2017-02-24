@@ -1,4 +1,4 @@
-var: <c:out value="request.var">,
+var: <c:out value="var">,
 var-eval: <c:out value="${request.var}">,
 var-default: <c:out value="${request.varNonExisting}" default="defaultValue" />,
 var-default-not-set: <c:out value="${request.varNonExisting}"/>
