@@ -12,5 +12,5 @@ set(SOURCE_FILES
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
-add_library(translation ${SOURCE_FILES})
-target_link_libraries(translation ctemplate)
+add_library(ctemplate_translation ${SOURCE_FILES})
+target_link_libraries(ctemplate_translation ctemplate)

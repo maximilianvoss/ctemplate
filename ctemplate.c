@@ -83,7 +83,7 @@ static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), 
 	json2map_t *json2mapObj = json2map_init();
 	json2map_registerDataHook(json2mapObj, data, set);
 	json2map_registerObjectHook(json2mapObj, objects, set);
-	json2map_parse(json2mapObj, json);
+	json2map_parse(json2mapObj, NULL, json);
 	json2map_destroy(json2mapObj);
 }
 
