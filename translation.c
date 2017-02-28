@@ -53,6 +53,7 @@ static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "void *__internal_requestObjects = __internal_mfunction->createMap();\n");
 	fprintf(file, "char __internal_expressionString[255];\n");
 	fprintf(file, "char *__internal_tmp;\n");
+	fprintf(file, "__internal_mfunction->set(__internal_%sValues, \"request\", __internal_jsonString);\n", VARIABLE_HANDLER_MAP_NOT_SET);
 	fprintf(file, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_requestValues, __internal_requestObjects, __internal_jsonString);\n");
 }
 

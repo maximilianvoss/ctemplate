@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <csafestring.h>
 #include "expression_builder.h"
 #include "variable_handler.h"
 
@@ -14,10 +13,10 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			handler_variable_t *varhandlerNext = varhandler_create(matches->next->next->string);
 			
 			if ( matches->type == VARIABLE ) {
-				fprintf(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandler->mapName->data, varhandler->variableName->data);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandler);
 			}
 			if ( matches->next->next->type == VARIABLE ) {
-				fprintf(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandlerNext->mapName->data, varhandlerNext->variableName->data);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandler);
 			}
 			
 			if ( !strncmp(matches->next->string, "eq", 2) || !strncmp(matches->next->string, "==", 2) ) {
@@ -27,14 +26,13 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			}
 
 			if ( matches->type == VARIABLE ) {
-				fprintf(out, "__internal_mfunction->get(__internal_%sValues, \"%s\"), ", varhandler->mapName->data, varhandler->variableName->data);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\"), ", varhandler);
 			} else {
 				fprintf(out, "\"%s\", ", matches->string);
 			}
 
 			if ( matches->next->next->type == VARIABLE ) {
-				\
-                fprintf(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandlerNext->mapName->data, varhandlerNext->variableName->data);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandler);
 			} else {
 				fprintf(out, "\"%s\"", matches->next->next->string);
 			}
@@ -55,12 +53,12 @@ static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matche
 			if ( builder_buildStringCompare(out, matches) ) {
 				return matches->next->next;
 			} else {
-				fprintf(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandler->mapName->data, varhandler->variableName->data);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandler);
 			}
 		} else if ( analysation->hasFloat ) {
-			fprintf(out, "atof(__internal_mfunction->get(__internal_%sValues, \"%s\"))", varhandler->mapName->data, varhandler->variableName->data);
+			varhandler_output(out, "atof(__internal_mfunction->get(__internal_%sValues, \"%s\"))", varhandler);
 		} else if ( analysation->hasInt ) {
-			fprintf(out, "atol(__internal_mfunction->get(__internal_%sValues, \"%s\"))", varhandler->mapName->data, varhandler->variableName->data);
+			varhandler_output(out, "atol(__internal_mfunction->get(__internal_%sValues, \"%s\"))", varhandler);
 		}
 		varhandler_destroy(varhandler);
 	}

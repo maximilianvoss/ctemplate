@@ -3,6 +3,8 @@
 
 static char *cforeach_openTag(char *line, FILE *out);
 static char *cforeach_closeTag(char *line, FILE *out);
+static void cforeach_counterLoop(csafestring_t *var, csafestring_t *begin, csafestring_t *end, csafestring_t *step, FILE *out);
+static void cforeach_elementLoop(csafestring_t *var, csafestring_t *items, FILE *out);
 
 static translation_module_t module_cforeach = {
 		.tagOpen = "<c:forEach",
@@ -28,29 +30,42 @@ static char *cforeach_openTag(char *line, FILE *out) {
 	csafestring_t *begin = modules_extractVariable(line, "begin");
 	csafestring_t *end = modules_extractVariable(line, "end");
 	csafestring_t *step = modules_extractVariable(line, "step");
+	csafestring_t *items = modules_extractVariable(line, "items");
 
-	if ( var == NULL || begin == NULL || end == NULL ) {
-		safe_destroy(var);
-		safe_destroy(begin);
-		safe_destroy(end);
-		safe_destroy(step);
-		return modules_findEndOfTag(line) + 1;
+	if ( var != NULL && items != NULL ) {
+		cforeach_elementLoop(var, items, out);
+	} else if ( var != NULL && begin != NULL && end != NULL ) {
+		cforeach_counterLoop(var, begin, end, step, out);
 	}
-
-	fprintf(out, "for ( int %s = %s; %s <= %s; ", var->data, begin->data, var->data, end->data);
-	if ( step == NULL ) {
-		fprintf(out, "%s++) {\n", var->data);
-	} else {
-		fprintf(out, "%s+=%s) {\n", var->data, step->data);
-	}
-	fprintf(out, "snprintf(__internal_expressionString, 255, \"%s\", %s);\n", "%d", var->data);
-	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_expressionString);\n", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
 
 	safe_destroy(var);
 	safe_destroy(begin);
 	safe_destroy(end);
 	safe_destroy(step);
+	safe_destroy(items);
 	return modules_findEndOfTag(line) + 1;
+}
+
+static void cforeach_counterLoop(csafestring_t *var, csafestring_t *begin, csafestring_t *end, csafestring_t *step, FILE *out) {
+	fprintf(out, "for ( ");
+	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_intToString(__internal_expressionString, 255, %s));", VARIABLE_HANDLER_MAP_NOT_SET, var->data, begin->data);
+	fprintf(out, "atoi(__internal_mfunction->get(__internal_%sValues, \"%s\")) <= %s;", VARIABLE_HANDLER_MAP_NOT_SET, var->data, end->data);
+	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_intToString(__internal_expressionString, 255,", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
+	if ( step == NULL ) {
+		fprintf(out, "atoi(__internal_mfunction->get(__internal_%sValues, \"%s\")) + 1", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
+	} else {
+		fprintf(out, "atoi(__internal_mfunction->get(__internal_%sValues, \"%s\")) + %s", VARIABLE_HANDLER_MAP_NOT_SET, var->data, step->data);
+	}
+	fprintf(out, "))) {");
+}
+
+static void cforeach_elementLoop(csafestring_t *var, csafestring_t *items, FILE *out) {
+
+//	fprintf(out, "void *__internal_requestValues = __internal_mfunction->createMap();\n");
+//	fprintf(out, "void *__internal_requestObjects = __internal_mfunction->createMap();\n");
+//	fprintf(out, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_requestValues, __internal_requestObjects, __internal_jsonString);\n");
+
+	fprintf(out, "{\n");
 }
 
 static char *cforeach_closeTag(char *line, FILE *out) {

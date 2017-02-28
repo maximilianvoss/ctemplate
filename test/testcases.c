@@ -38,7 +38,7 @@ static int test_fileNotExists(ctemplate_t *ctemplate) {
 
 static int test_cout(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cout.txt", "{\"var\": \"value\"}");
-	ASSERTSTR("var: var,var-eval: value,var-default: defaultValue,var-default-not-set: ", value);
+	ASSERTSTR("var: var,var-eval: value,var-default: defaultValue,var-default-not-set: ,request: {\"var\": \"value\"}", value);
 	free(value);
 	return 0;
 }
@@ -79,11 +79,11 @@ static int test_cchoose(ctemplate_t *ctemplate) {
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", "{\"var\":\"value1\"}");
 	ASSERTSTR("value1 is set", value);
 	free(value);
-	
+
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", "{\"var\":\"value2\"}");
 	ASSERTSTR("value2 is set", value);
 	free(value);
-	
+
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", NULL);
 	ASSERTSTR("nothing is set", value);
 	free(value);
@@ -92,10 +92,10 @@ static int test_cchoose(ctemplate_t *ctemplate) {
 }
 
 static int test_cforeach(ctemplate_t *ctemplate) {
-	char *value = ctemplate_executeTemplate(ctemplate, "cforeach.txt", NULL);
+	char *value = ctemplate_executeTemplate(ctemplate, "cforeach.txt", "{ \"array\": [\"hello\", \"world\"] }");
 	ASSERTSTR("Item 1, Item 2, Item 3, Item 4, Item 5", value);
 	free(value);
-	
+
 	return 0;
 }
 

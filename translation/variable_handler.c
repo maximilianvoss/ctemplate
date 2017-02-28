@@ -29,3 +29,7 @@ void varhandler_destroy(handler_variable_t *handler) {
 		free(handler);
 	}
 }
+
+void varhandler_output(FILE *out, char *str, handler_variable_t *varhandler) {
+	fprintf(out, str, varhandler->mapName->data, varhandler->variableName->data);
+}

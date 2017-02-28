@@ -63,20 +63,33 @@ void hash_set(void *data, char *key, char *value) {
 		return;
 	}
 
-	size_t length = strlen(value) + 1;
+	size_t length = 0;
+	if ( value != NULL ) {
+		length = strlen(value) + 1;
+	}
 	while ( map != NULL ) {
 		if ( map->key != NULL && !strcmp(map->key, key) ) {
-			free(map->value);
-			map->value = (char *) malloc(sizeof(char) * length);
-			strcpy(map->value, value);
+			if ( map->value != NULL ) {
+				free(map->value);
+			}
+			if ( value != NULL ) {
+				map->value = (char *) malloc(sizeof(char) * length);
+				strcpy(map->value, value);
+			} else {
+				map->value = NULL;
+			}
 			return;
 		}
 		map = map->next;
 	}
 
 	linkedlist_t *element = (linkedlist_t *) malloc(sizeof(linkedlist_t));
-	element->value = (char *) malloc(sizeof(char) * length);
-	strcpy(element->value, value);
+	if ( value != NULL ) {
+		element->value = (char *) malloc(sizeof(char) * length);
+		strcpy(element->value, value);
+	} else {
+		element->value = NULL;
+	}
 
 	length = strlen(key) + 1;
 	element->key = (char *) malloc(sizeof(char) * length);
@@ -108,7 +121,9 @@ void hash_unset(void *data, char *key) {
 			map->next = map->next->next;
 
 			free(tmp->key);
-			free(tmp->value);
+			if ( tmp->value != NULL ) {
+				free(tmp->value);
+			}
 			free(tmp);
 			return;
 		}

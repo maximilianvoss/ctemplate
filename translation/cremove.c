@@ -33,7 +33,7 @@ static char *cremove_openTag(char *line, FILE *out) {
 	}
 
 	handler_variable_t *varhandler = varhandler_create(var->data);
-	fprintf(out, "__internal_mfunction->unset(__internal_%sValues, \"%s\");\n", varhandler->mapName->data, varhandler->variableName->data);
+	varhandler_output(out, "__internal_mfunction->unset(__internal_%sValues, \"%s\");\n", varhandler);
 	varhandler_destroy(varhandler);
 
 	safe_destroy(var);

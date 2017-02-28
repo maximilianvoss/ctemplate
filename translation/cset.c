@@ -37,11 +37,12 @@ static char *cset_openTag(char *line, FILE *out) {
 
 	handler_variable_t *varhandler = varhandler_create(var->data);
 	if ( !safe_strncmp(value, "${", 2) ) {
-		fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", ", varhandler->mapName->data, varhandler->variableName->data);
+		varhandler_output(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", ", varhandler);
 		expression_eval(value->data, out, true);
 		fprintf(out, ");\n");
 	} else {
-		fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", \"%s\");\n", varhandler->mapName->data, varhandler->variableName->data, value->data);
+		varhandler_output(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", ", varhandler);
+		fprintf(out, "\"%s\");\n", value->data);
 	}
 
 	varhandler_destroy(varhandler);
