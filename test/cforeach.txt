@@ -1,3 +1,7 @@
 <c:forEach var="i" begin="1" end="5">
 Item <c:out value="${i}"><c:if test="${i < 5}">, </c:if>
 </c:forEach>
+
+<c:forEach var="tmp" items="${request.array}">
+    Tmp: <c:out value="${tmp}">
+</c:forEach>

@@ -9,7 +9,7 @@
 typedef struct s_loader_module {
 	csafestring_t *path;
 	void *handle;
-	void (*method)(csafestring_t *, ctemplate_functions_t *, char *);
+	void (*method)(void *, ctemplate_functions_t *, ctemplate_utilities_t *, char *);
 
 	struct s_loader_module *next;
 	struct s_loader_module *prev;

@@ -29,7 +29,8 @@ void translation_processTemplate(translation_module_t *translation_modules, char
 
 static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "#include <stdio.h>\n");
-	fprintf(file, "#include <csafestring.h>\n");
+	fprintf(file, "#include <stdlib.h>\n");
+	fprintf(file, "#include <string.h>\n");
 	fprintf(file, "typedef struct {\n");
 	fprintf(file, "	void * (* createMap) ();\n");
 	fprintf(file, "	void (* destroyMap) (void *map);\n");
@@ -38,15 +39,13 @@ static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "void (*unset)(void *map, char *key);\n");
 	fprintf(file, " void (*parseJson)(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);\n");
 	fprintf(file, "} ctemplate_functions_t;\n\n");
-	fprintf(file, "char *__internal_floatToString(char *str, size_t size, float expr ) {\n");
-	fprintf(file, "snprintf(str, size, \"%s\", expr);\n", "%f");
-	fprintf(file, "return str;\n");
-	fprintf(file, "}\n\n");
-	fprintf(file, "char *__internal_intToString(char *str, size_t size, int expr ) {\n");
-	fprintf(file, "snprintf(str, size, \"%s\", expr);\n", "%d");
-	fprintf(file, "return str;\n");
-	fprintf(file, "}\n\n");
-	fprintf(file, "void %s(csafestring_t *__internal_string, ctemplate_functions_t *__internal_mfunction, char *__internal_jsonString) {\n", MODULE_EXEC_MODULE);
+	fprintf(file, "typedef struct {\n");
+	fprintf(file, "	char *(*intToString)(char *str, size_t size, int expr);\n");
+	fprintf(file, "	char *(*floatToString)(char *str, size_t size, float expr);\n");
+	fprintf(file, "	char *(*safe_strcat)(void *, const char *);\n");
+	fprintf(file, "} ctemplate_utilities_t;\n\n");
+	fprintf(file, "void %s(void *__internal_string, ctemplate_functions_t *__internal_mfunction, ctemplate_utilities_t *__internal_hfunction, char *__internal_jsonString) {\n",
+	        MODULE_EXEC_MODULE);
 	fprintf(file, "void *__internal_%sValues = __internal_mfunction->createMap();\n", VARIABLE_HANDLER_MAP_NOT_SET);
 	fprintf(file, "void *__internal_requestValues = __internal_mfunction->createMap();\n");
 	fprintf(file, "void *__internal_requestObjects = __internal_mfunction->createMap();\n");
@@ -85,7 +84,7 @@ static void translation_processLine(translation_module_t *translation_modules, F
 			method = modules_matches(translation_modules, line);
 			if ( method != NULL ) {
 				if ( *buffer != '\0' ) {
-					fprintf(out, "safe_strcat(__internal_string, \"%s\");\n", buffer);
+					fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, \"%s\");\n", buffer);
 					memset(buffer, '\0', BUFFER_SIZE + 1);
 					ptr = buffer;
 				}
@@ -99,7 +98,7 @@ static void translation_processLine(translation_module_t *translation_modules, F
 	}
 
 	if ( *buffer != '\0' ) {
-		fprintf(out, "safe_strcat(__internal_string, \"%s\");\n", buffer);
+		fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, \"%s\");\n", buffer);
 	}
 }
 

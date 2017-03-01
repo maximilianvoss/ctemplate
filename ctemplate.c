@@ -3,6 +3,7 @@
 #include "filemanager.h"
 #include "date.h"
 #include "translation.h"
+#include "utils.h"
 
 static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);
 static char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json);
@@ -12,7 +13,6 @@ static loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestri
 ctemplate_t *ctemplate_init(char *templatePath, char *workingPath, ctemplate_functions_t *methods, bool recompile) {
 
 	ctemplate_t *ctemplate = (ctemplate_t *) malloc(sizeof(ctemplate_t));
-
 
 	ctemplate->templateBaseDir = safe_create(templatePath);
 	if ( !safe_strcmp(ctemplate->templateBaseDir, "") ) {
@@ -33,6 +33,10 @@ ctemplate_t *ctemplate_init(char *templatePath, char *workingPath, ctemplate_fun
 	ctemplate->modules = NULL;
 	ctemplate->translation_modules = modules_init();
 	ctemplate->mfunctions->parseJson = ctemplate_parseJson;
+
+	ctemplate->hfunctions.intToString = intToString;
+	ctemplate->hfunctions.floatToString = floatToString;
+	ctemplate->hfunctions.strcat = safe_strcat;
 
 	return ctemplate;
 }
@@ -70,7 +74,7 @@ char *ctemplate_executeTemplate(ctemplate_t *ctemplate, char *templateName, char
 
 static char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json) {
 	csafestring_t *output = safe_create(NULL);
-	module->method(output, ctemplate->mfunctions, json);
+	module->method(output, ctemplate->mfunctions, &ctemplate->hfunctions, json);
 
 	char *retVal = (char *) malloc(sizeof(char) * output->buffer_length);
 	memcpy (retVal, output->data, output->buffer_length);

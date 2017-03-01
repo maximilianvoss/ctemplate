@@ -37,9 +37,9 @@ static char *cout_openTag(char *line, FILE *out) {
 		fprintf(out, "__internal_tmp = ");
 		expression_eval(value->data, out, true);
 		fprintf(out, ";\n");
-		fprintf(out, "safe_strcat(__internal_string, (__internal_tmp != NULL) ? __internal_tmp : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue->data : "");
+		fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, (__internal_tmp != NULL) ? __internal_tmp : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue->data : "");
 	} else {
-		fprintf(out, "safe_strcat(__internal_string, \"%s\");\n", value->data);
+		fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, \"%s\");\n", value->data);
 	}
 
 	safe_destroy(value);

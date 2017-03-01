@@ -48,9 +48,10 @@ static char *cforeach_openTag(char *line, FILE *out) {
 
 static void cforeach_counterLoop(csafestring_t *var, csafestring_t *begin, csafestring_t *end, csafestring_t *step, FILE *out) {
 	fprintf(out, "for ( ");
-	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_intToString(__internal_expressionString, 255, %s));", VARIABLE_HANDLER_MAP_NOT_SET, var->data, begin->data);
+	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_hfunction->intToString(__internal_expressionString, 255, %s));", VARIABLE_HANDLER_MAP_NOT_SET, var->data,
+	        begin->data);
 	fprintf(out, "atoi(__internal_mfunction->get(__internal_%sValues, \"%s\")) <= %s;", VARIABLE_HANDLER_MAP_NOT_SET, var->data, end->data);
-	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_intToString(__internal_expressionString, 255,", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
+	fprintf(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", __internal_hfunction->intToString(__internal_expressionString, 255,", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
 	if ( step == NULL ) {
 		fprintf(out, "atoi(__internal_mfunction->get(__internal_%sValues, \"%s\")) + 1", VARIABLE_HANDLER_MAP_NOT_SET, var->data);
 	} else {

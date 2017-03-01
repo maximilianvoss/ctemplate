@@ -69,9 +69,9 @@ void builder_generateCode(FILE *out, pattern_match_t *matches, pattern_analyse_t
 
 	if ( returnString ) {
 		if ( analysation->hasFloat ) {
-			fprintf(out, "__internal_floatToString(__internal_expressionString, 255, ");
+			fprintf(out, "__internal_hfunction->floatToString(__internal_expressionString, 255, ");
 		} else if ( analysation->hasInt || analysation->hasEquation ) {
-			fprintf(out, "__internal_intToString(__internal_expressionString, 255, ");
+			fprintf(out, "__internal_hfunction->intToString(__internal_expressionString, 255, ");
 		}
 	}
 
