@@ -16,7 +16,7 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandler);
 			}
 			if ( matches->next->next->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandler);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandlerNext);
 			}
 			
 			if ( !strncmp(matches->next->string, "eq", 2) || !strncmp(matches->next->string, "==", 2) ) {
@@ -32,7 +32,7 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			}
 
 			if ( matches->next->next->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandler);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandlerNext);
 			} else {
 				fprintf(out, "\"%s\"", matches->next->next->string);
 			}
