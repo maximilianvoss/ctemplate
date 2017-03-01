@@ -12,7 +12,6 @@ int main(int argc, char **argv) {
 	methods.get = hash_get;
 	methods.set = hash_set;
 	methods.unset = hash_unset;
-	methods.find = hash_find;
 
 	ctemplate_t *ctemplate = ctemplate_init(EXAMPLEPATH, NULL, &methods, 1);
 	char *value = ctemplate_executeTemplate(ctemplate, "template.html", "{\"variable\":\"value\"}");

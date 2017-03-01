@@ -4,6 +4,8 @@
 #include <csafestring.h>
 #include "functions.h"
 
+#define MODULE_EXEC_MODULE "execute"
+
 typedef struct s_loader_module {
 	csafestring_t *path;
 	void *handle;

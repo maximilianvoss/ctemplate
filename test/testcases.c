@@ -106,7 +106,6 @@ int main(int argc, char **argv) {
 	methods.get = hash_get;
 	methods.set = hash_set;
 	methods.unset = hash_unset;
-	methods.find = hash_find;
 
 	ctemplate_t *ctemplate = ctemplate_init(TESTPATH, NULL, &methods, 1);
 
