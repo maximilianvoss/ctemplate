@@ -4,7 +4,7 @@
 #include <csafestring.h>
 #include <stdio.h>
 
-#define VARIABLE_HANDLER_MAP_NOT_SET "__internal_Undetermined"
+#define VARIABLE_HANDLER_MAP_NOT_SET "__internal_Root"
 
 typedef struct {
 	csafestring_t *mapName;
