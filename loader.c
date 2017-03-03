@@ -19,7 +19,7 @@ loader_module_t *loader_loadModule(loader_module_t *modules, csafestring_t *modu
 	module->path = safe_clone(modulePath);
 
 	module->handle = dlopen(module->path->data, RTLD_LAZY);
-	module->method = dlsym(module->handle, MODULE_EXEC_MODULE);
+	module->method = dlsym(module->handle, MODULE_EXEC_METHOD);
 
 	if ( modules == NULL ) {
 		module->next = NULL;
