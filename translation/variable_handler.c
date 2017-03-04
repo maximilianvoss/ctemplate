@@ -11,7 +11,7 @@ handler_variable_t *varhandler_create(char *variableName) {
 
 	pos = strchr(variableName, '.');
 	if ( pos == NULL ) {
-		handler->mapName = safe_create(VARIABLE_HANDLER_MAP_NOT_SET);
+		handler->mapName = safe_create(ROOT_MAP);
 		handler->variableName = safe_create(variableName);
 	} else {
 		handler->mapName = safe_create(NULL);
@@ -32,4 +32,15 @@ void varhandler_destroy(handler_variable_t *handler) {
 
 void varhandler_output(FILE *out, char *str, handler_variable_t *varhandler) {
 	fprintf(out, str, varhandler->mapName->data, varhandler->variableName->data);
+}
+
+void varhandler_registerVariable(FILE *file, char *varName, char *inputData) {
+	fprintf(file, "void *__internal_%s = __internal_mfunction->createMap();\n", varName);
+	fprintf(file, "__internal_mfunction->set(__internal_%s, \"%s\", __internal_jsonString);\n", ROOT_MAP, varName);
+	fprintf(file, "__internal_mfunction->parseJson(__internal_mfunction->set, __internal_%s, %s);\n", varName, inputData);
+}
+
+void varhandler_unregisterVariable(FILE *file, char *varName) {
+	fprintf(file, "__internal_mfunction->destroyMap(__internal_%s);\n", varName);
+	fprintf(file, "__internal_mfunction->unset(__internal_%s, \"%s\");\n", ROOT_MAP, varName);
 }

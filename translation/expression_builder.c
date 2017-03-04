@@ -13,10 +13,10 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			handler_variable_t *varhandlerNext = varhandler_create(matches->next->next->string);
 			
 			if ( matches->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandler);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\") != NULL && ", varhandler);
 			}
 			if ( matches->next->next->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\") != NULL && ", varhandlerNext);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\") != NULL && ", varhandlerNext);
 			}
 			
 			if ( !strncmp(matches->next->string, "eq", 2) || !strncmp(matches->next->string, "==", 2) ) {
@@ -26,13 +26,13 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			}
 
 			if ( matches->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\"), ", varhandler);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\"), ", varhandler);
 			} else {
 				fprintf(out, "\"%s\", ", matches->string);
 			}
 
 			if ( matches->next->next->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandlerNext);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\")", varhandlerNext);
 			} else {
 				fprintf(out, "\"%s\"", matches->next->next->string);
 			}
@@ -53,12 +53,12 @@ static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matche
 			if ( builder_buildStringCompare(out, matches) ) {
 				return matches->next->next;
 			} else {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%sValues, \"%s\")", varhandler);
+				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\")", varhandler);
 			}
 		} else if ( analysation->hasFloat ) {
-			varhandler_output(out, "atof(__internal_mfunction->get(__internal_%sValues, \"%s\"))", varhandler);
+			varhandler_output(out, "atof(__internal_mfunction->get(__internal_%s, \"%s\"))", varhandler);
 		} else if ( analysation->hasInt ) {
-			varhandler_output(out, "atol(__internal_mfunction->get(__internal_%sValues, \"%s\"))", varhandler);
+			varhandler_output(out, "atol(__internal_mfunction->get(__internal_%s, \"%s\"))", varhandler);
 		}
 		varhandler_destroy(varhandler);
 	}

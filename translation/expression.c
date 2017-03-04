@@ -17,8 +17,8 @@ static regex_t regexPclose;
 static regex_t regexNot;
 
 static void expression_free(pattern_match_t *matches);
-static pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation);
-static char *expression_functionExpression(char *line, FILE *out);
+static pattern_match_t *expression_extract(pattern_analyse_t *analysation, char *string);
+static char *expression_functionExpression(FILE *out, char *line);
 static char *expression_findEndOfExpression(char *line);
 
 static translation_module_t module_expression = {
@@ -61,7 +61,7 @@ void expression_unregister(translation_module_t *modules) {
 	regfree(&regexEmpty);
 }
 
-void expression_eval(char *valueIn, FILE *out, bool returnString) {
+void expression_eval(FILE *out, char *valueIn, bool returnString) {
 	pattern_analyse_t analysation;
 	analysation.hasEquation = false;
 	analysation.hasFloat = false;
@@ -78,7 +78,7 @@ void expression_eval(char *valueIn, FILE *out, bool returnString) {
 		tmp = strchr(expr, '}');
 		*tmp = '\0';
 
-		pattern_match_t *matches = expression_extract(expr, &analysation);
+		pattern_match_t *matches = expression_extract(&analysation, expr);
 		builder_generateCode(out, matches, &analysation, returnString);
 
 		free(dup);
@@ -95,7 +95,7 @@ static void expression_free(pattern_match_t *matches) {
 	free(matches);
 }
 
-static pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation) {
+static pattern_match_t *expression_extract(pattern_analyse_t *analysation, char *string) {
 	regmatch_t match[2];
 	pattern_match_t *matches = NULL;
 	pattern_match_t *lastMatch = NULL;
@@ -163,10 +163,10 @@ static char *expression_findEndOfExpression(char *line) {
 	return modules_findEndOfElement(line, '}');
 }
 
-static char *expression_functionExpression(char *line, FILE *out) {
+static char *expression_functionExpression(FILE *out, char *line) {
 	char *endOfExpression = expression_findEndOfExpression(line);
 	fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, ");
-	expression_eval(line, out, true);
+	expression_eval(out, line, true);
 	fprintf(out, ");\n");
 	return endOfExpression + 1;
 }

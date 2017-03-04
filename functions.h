@@ -7,7 +7,7 @@ typedef struct {
 	char *(*get)(void *map, char *key);
 	void (*set)(void *map, char *key, char *value);
 	void (*unset)(void *map, char *key);
-	void (*parseJson)(void (*set)(void *map, char *key, char *value), void *data, void *objects, char *json);
+	void (*parseJson)(void (*set)(void *map, char *key, char *value), void *data, char *json);
 } ctemplate_functions_t;
 
 typedef struct {

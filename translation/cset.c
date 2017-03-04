@@ -3,8 +3,8 @@
 #include "expression.h"
 #include "variable_handler.h"
 
-static char *cset_openTag(char *line, FILE *out);
-static char *cset_closeTag(char *line, FILE *out);
+static char *cset_openTag(FILE *out, char *line);
+static char *cset_closeTag(FILE *out, char *line);
 
 static translation_module_t module_cset = {
 		.tagOpen = "<c:set",
@@ -25,7 +25,7 @@ void cset_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cset);
 }
 
-static char *cset_openTag(char *line, FILE *out) {
+static char *cset_openTag(FILE *out, char *line) {
 	csafestring_t *value = modules_extractVariable(line, "value");
 	csafestring_t *var = modules_extractVariable(line, "var");
 
@@ -37,11 +37,11 @@ static char *cset_openTag(char *line, FILE *out) {
 
 	handler_variable_t *varhandler = varhandler_create(var->data);
 	if ( !safe_strncmp(value, "${", 2) ) {
-		varhandler_output(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", ", varhandler);
-		expression_eval(value->data, out, true);
+		varhandler_output(out, "__internal_mfunction->set(__internal_%s, \"%s\", ", varhandler);
+		expression_eval(out, value->data, true);
 		fprintf(out, ");\n");
 	} else {
-		varhandler_output(out, "__internal_mfunction->set(__internal_%sValues, \"%s\", ", varhandler);
+		varhandler_output(out, "__internal_mfunction->set(__internal_%s, \"%s\", ", varhandler);
 		fprintf(out, "\"%s\");\n", value->data);
 	}
 
@@ -51,6 +51,6 @@ static char *cset_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-static char *cset_closeTag(char *line, FILE *out) {
+static char *cset_closeTag(FILE *out, char *line) {
 	return modules_findEndOfTag(line) + 1;
 }

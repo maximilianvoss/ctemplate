@@ -34,6 +34,6 @@ typedef struct {
 
 void expression_register(translation_module_t *modules);
 void expression_unregister(translation_module_t *modules);
-void expression_eval(char *line, FILE *out, bool returnString);
+void expression_eval(FILE *out, char *line, bool returnString);
 
 #endif
