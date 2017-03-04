@@ -109,14 +109,25 @@ void hash_unset(void *data, char *key) {
 #endif
 
 	linkedlist_t *map = (linkedlist_t *) data;
-	if ( key == NULL ) {
+	if ( key == NULL && key[0] == '\0' ) {
 #ifdef DEBUG
 		printf("hash_unset([void *], %s)... DONE\n", key);
 #endif
 		return;
 	}
+
+	char *realKey = key;
+	char wildcard = 0;
+	size_t keyLength = strlen(key);
+	if ( key[keyLength - 1] == '*' ) {
+		realKey = calloc(sizeof(char), keyLength);
+		strncpy(realKey, key, keyLength - 1);
+		keyLength--;
+		wildcard = 1;
+	}
+	
 	while ( map->next != NULL ) {
-		if ( map->next->key != NULL && !strcmp(map->next->key, key) ) {
+		if ( map->next->key != NULL && ( ( !wildcard && !strcmp(map->next->key, realKey) ) || ( wildcard && !strncmp(map->next->key, realKey, keyLength) ) ) ) {
 			linkedlist_t *tmp = map->next;
 			map->next = map->next->next;
 
@@ -125,9 +136,16 @@ void hash_unset(void *data, char *key) {
 				free(tmp->value);
 			}
 			free(tmp);
-			return;
+
+			if ( !wildcard ) {
+				return;
+			}
 		}
 		map = map->next;
+	}
+
+	if ( wildcard ) {
+		free(realKey);
 	}
 #ifdef DEBUG
 	printf("hash_unset([void *], %s)... DONE\n", key);

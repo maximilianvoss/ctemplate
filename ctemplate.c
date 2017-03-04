@@ -5,7 +5,7 @@
 #include "translation.h"
 #include "utils.h"
 
-static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, char *json);
+static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, char *prefix, char *json);
 static char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *module, char *json);
 static char ctemplate_isRecompilationNecessary(char *templatePath, char *sourcePath, char *libraryPath);
 static loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath);
@@ -83,10 +83,10 @@ static char *ctemplate_executeModule(ctemplate_t *ctemplate, loader_module_t *mo
 	return retVal;
 }
 
-static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, char *json) {
+static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), void *data, char *prefix, char *json) {
 	json2map_t *json2mapObj = json2map_init(1);
 	json2map_registerDataHook(json2mapObj, data, set);
-	json2map_parse(json2mapObj, NULL, json);
+	json2map_parse(json2mapObj, prefix, json);
 	json2map_destroy(json2mapObj);
 }
 

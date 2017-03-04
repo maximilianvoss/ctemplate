@@ -1,5 +1,4 @@
 #include "translation.h"
-#include "translation/variable_handler.h"
 #include "compiler.h"
 #include "loader.h"
 
@@ -34,26 +33,49 @@ static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "#include <stdio.h>\n");
 	fprintf(file, "#include <stdlib.h>\n");
 	fprintf(file, "#include <string.h>\n");
-	fprintf(file, "#define EXPR_STRING_LENGTH 255\n");
+	fprintf(file, "#define EXPR_STRING_LENGTH 255\n\n");
+	
 	fprintf(file, "typedef struct {\n");
 	fprintf(file, "	void * (* createMap)();\n");
 	fprintf(file, "	void (* destroyMap)(void *);\n");
 	fprintf(file, "	char * (* get)(void *, char *);\n");
 	fprintf(file, "	void (* set)(void *, char *, char *);\n");
 	fprintf(file, "	void (* unset)(void *, char *);\n");
-	fprintf(file, " void (* parseJson)(void (* set)(void *, char *, char *), void *, char *);\n");
+	fprintf(file, " void (* parseJson)(void (* set)(void *, char *, char *), void *, char *, char *);\n");
 	fprintf(file, "} ctemplate_functions_t;\n\n");
+
 	fprintf(file, "typedef struct {\n");
 	fprintf(file, "	char *(* intToString)(char *, size_t, int);\n");
 	fprintf(file, "	char *(* floatToString)(char *, size_t, float);\n");
 	fprintf(file, "	char *(* safe_strcat)(void *, const char *);\n");
 	fprintf(file, "} ctemplate_utilities_t;\n\n");
+
+	fprintf(file, "void setVariable(ctemplate_functions_t *mfunctions, void *map, char *varName, char *jsonString) {\n");
+	fprintf(file, "	char *objName = calloc(sizeof(char), strlen(varName) + 4 );\n");
+	fprintf(file, "	strcpy(objName, varName);\n");
+	fprintf(file, "	strcat(objName, \"[o]\");\n");
+	fprintf(file, "	mfunctions->set(map, objName, jsonString);\n");
+	fprintf(file, "	mfunctions->parseJson(mfunctions->set, map, varName, jsonString);\n");
+	fprintf(file, "	free(objName);\n");
+	fprintf(file, "}\n\n");
+
+	fprintf(file, "char *getVariable(ctemplate_functions_t *mfunctions, void *map, char *varName) {\n");
+	fprintf(file, "char *tmp = mfunctions->get(map, varName);\n");
+	fprintf(file, "if ( tmp != NULL ) {\n");
+	fprintf(file, "	return tmp;\n");
+	fprintf(file, "}\n");
+	fprintf(file, "	char *objName = calloc(sizeof(char), strlen(varName) + 4 );\n");
+	fprintf(file, "	strcpy(objName, varName);\n");
+	fprintf(file, "	strcat(objName, \"[o]\");\n");
+	fprintf(file, " return mfunctions->get(map, objName);\n");
+	fprintf(file, "}\n\n");
+	
 	fprintf(file, "void %s(void *__internal_string, ctemplate_functions_t *__internal_mfunction, ctemplate_utilities_t *__internal_hfunction, char *__internal_jsonString) {\n",
 	        MODULE_EXEC_METHOD);
 	fprintf(file, "char __internal_expressionString[EXPR_STRING_LENGTH];\n");
 	fprintf(file, "char *__internal_tmp;\n");
-	fprintf(file, "void *__internal_%s = __internal_mfunction->createMap();\n", ROOT_MAP);
-	varhandler_registerVariable(file, "request", "__internal_jsonString");
+	fprintf(file, "void *__internal_root = __internal_mfunction->createMap();\n");
+	fprintf(file, "setVariable(__internal_mfunction, __internal_root, \"request\", __internal_jsonString);\n\n");
 }
 
 static void translation_processLine(translation_module_t *translation_modules, FILE *out, csafestring_t *output, char *line) {
@@ -98,8 +120,7 @@ static void translation_processLine(translation_module_t *translation_modules, F
 }
 
 static void translation_closeSourceFile(FILE *file) {
-	varhandler_unregisterVariable(file, "request");
-	fprintf(file, "__internal_mfunction->destroyMap(__internal_%s);\n", ROOT_MAP);
+	fprintf(file, "__internal_mfunction->destroyMap(__internal_root);\n");
 	fprintf(file, "}\n");
 	fclose(file);
 }

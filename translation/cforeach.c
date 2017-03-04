@@ -1,5 +1,4 @@
 #include "cforeach.h"
-#include "variable_handler.h"
 
 static char *cforeach_openTag(FILE *out, char *line);
 static char *cforeach_closeTag(FILE *out, char *line);
@@ -48,17 +47,27 @@ static char *cforeach_openTag(FILE *out, char *line) {
 
 static void cforeach_counterLoop(FILE *out, csafestring_t *var, csafestring_t *begin, csafestring_t *end, csafestring_t *step) {
 	fprintf(out, "for ( ");
-	fprintf(out, "__internal_mfunction->set(__internal_%s, \"%s\", __internal_hfunction->intToString(__internal_expressionString, EXPR_STRING_LENGTH, %s));", ROOT_MAP,
-	        var->data,
-	        begin->data);
-	fprintf(out, "atoi(__internal_mfunction->get(__internal_%s, \"%s\")) <= %s;", ROOT_MAP, var->data, end->data);
-	fprintf(out, "__internal_mfunction->set(__internal_%s, \"%s\", __internal_hfunction->intToString(__internal_expressionString, EXPR_STRING_LENGTH,", ROOT_MAP, var->data);
+	fprintf(out, "setVariable(__internal_mfunction, __internal_root, \"%s\", __internal_hfunction->intToString(__internal_expressionString, EXPR_STRING_LENGTH, %s));\n", var->data, begin->data);
+
+	fprintf(out, "atoi(");
+	fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", var->data);
+	fprintf(out, ") <= %s;", end->data);
+
+	fprintf(out, "setVariable(__internal_mfunction, __internal_root, \"%s\", ", var->data);
+	fprintf(out, "__internal_hfunction->intToString(__internal_expressionString, EXPR_STRING_LENGTH,");
+	
 	if ( step == NULL ) {
-		fprintf(out, "atoi(__internal_mfunction->get(__internal_%s, \"%s\")) + 1", ROOT_MAP, var->data);
+		fprintf(out, "atoi(");
+		fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", var->data);
+		fprintf(out, ") + 1");
 	} else {
-		fprintf(out, "atoi(__internal_mfunction->get(__internal_%s, \"%s\")) + %s", ROOT_MAP, var->data, step->data);
+		fprintf(out, "atoi(");
+		fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", var->data);
+		fprintf(out, ") + %s", step->data);
 	}
-	fprintf(out, "))) {");
+	fprintf(out, ")");
+	fprintf(out, ")");
+	fprintf(out, ") {\n");
 }
 
 static void cforeach_elementLoop(FILE *out, csafestring_t *var, csafestring_t *items) {

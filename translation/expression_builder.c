@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "expression_builder.h"
-#include "variable_handler.h"
 
 static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation);
 static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
@@ -9,14 +8,12 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
 static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 	if ( matches->type == VARIABLE || matches->type == STRING ) {
 		if ( matches->next != NULL && matches->next->type == EQUATION && matches->next->next != NULL && ( matches->next->next->type == STRING || matches->next->next->type == VARIABLE ) ) {
-			handler_variable_t *varhandler = varhandler_create(matches->string);
-			handler_variable_t *varhandlerNext = varhandler_create(matches->next->next->string);
 			
 			if ( matches->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\") != NULL && ", varhandler);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\") != NULL && ", matches->string);
 			}
 			if ( matches->next->next->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\") != NULL && ", varhandlerNext);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\") != NULL && ", matches->next->next->string);
 			}
 			
 			if ( !strncmp(matches->next->string, "eq", 2) || !strncmp(matches->next->string, "==", 2) ) {
@@ -26,20 +23,18 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			}
 
 			if ( matches->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\"), ", varhandler);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\"), ", matches->string);
 			} else {
 				fprintf(out, "\"%s\", ", matches->string);
 			}
 
 			if ( matches->next->next->type == VARIABLE ) {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\")", varhandlerNext);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", matches->next->next->string);
 			} else {
 				fprintf(out, "\"%s\"", matches->next->next->string);
 			}
 			fprintf(out, ")");
 
-			varhandler_destroy(varhandler);
-			varhandler_destroy(varhandlerNext);
 			return true;
 		}
 	}
@@ -48,19 +43,17 @@ static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 
 static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation) {
 	if ( matches->type == VARIABLE ) {
-		handler_variable_t *varhandler = varhandler_create(matches->string);
 		if ( !analysation->hasFloat && !analysation->hasInt && !analysation->hasOperator ) {
 			if ( builder_buildStringCompare(out, matches) ) {
 				return matches->next->next;
 			} else {
-				varhandler_output(out, "__internal_mfunction->get(__internal_%s, \"%s\")", varhandler);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", matches->string);
 			}
 		} else if ( analysation->hasFloat ) {
-			varhandler_output(out, "atof(__internal_mfunction->get(__internal_%s, \"%s\"))", varhandler);
+			fprintf(out, "atof(getVariable(__internal_mfunction, __internal_root, \"%s\"))", matches->string);
 		} else if ( analysation->hasInt ) {
-			varhandler_output(out, "atol(__internal_mfunction->get(__internal_%s, \"%s\"))", varhandler);
+			fprintf(out, "atol(getVariable(__internal_mfunction, __internal_root, \"%s\"))", matches->string);
 		}
-		varhandler_destroy(varhandler);
 	}
 	return matches;
 }

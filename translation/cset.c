@@ -1,7 +1,6 @@
 #include <csafestring.h>
 #include "cset.h"
 #include "expression.h"
-#include "variable_handler.h"
 
 static char *cset_openTag(FILE *out, char *line);
 static char *cset_closeTag(FILE *out, char *line);
@@ -35,17 +34,14 @@ static char *cset_openTag(FILE *out, char *line) {
 		return modules_findEndOfTag(line) + 1;
 	}
 
-	handler_variable_t *varhandler = varhandler_create(var->data);
 	if ( !safe_strncmp(value, "${", 2) ) {
-		varhandler_output(out, "__internal_mfunction->set(__internal_%s, \"%s\", ", varhandler);
+		fprintf(out, "setVariable(__internal_mfunction, __internal_root, \"%s\",", var->data);
 		expression_eval(out, value->data, true);
 		fprintf(out, ");\n");
 	} else {
-		varhandler_output(out, "__internal_mfunction->set(__internal_%s, \"%s\", ", varhandler);
-		fprintf(out, "\"%s\");\n", value->data);
+		fprintf(out, "setVariable(__internal_mfunction, __internal_root, \"%s\", \"%s\");\n", var->data, value->data);
 	}
 
-	varhandler_destroy(varhandler);
 	safe_destroy(value);
 	safe_destroy(var);
 	return modules_findEndOfTag(line) + 1;

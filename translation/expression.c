@@ -137,7 +137,7 @@ static pattern_match_t *expression_extract(pattern_analyse_t *analysation, char 
 		}
 
 		matched = (pattern_match_t *) malloc(sizeof(pattern_match_t));
-		matched->string = (char *) calloc(sizeof(char), (int64_t) match[1].rm_eo - match[1].rm_so + 1);
+		matched->string = (char *) calloc(sizeof(char), (size_t) match[1].rm_eo - match[1].rm_so + 1);
 		strncpy(matched->string, &string[match[1].rm_so], (int64_t) match[1].rm_eo - match[1].rm_so);
 		string += (int64_t) match[1].rm_eo;
 
