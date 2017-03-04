@@ -109,7 +109,7 @@ void hash_unset(void *data, char *key) {
 #endif
 
 	linkedlist_t *map = (linkedlist_t *) data;
-	if ( key == NULL && key[0] == '\0' ) {
+	if ( key == NULL ) {
 #ifdef DEBUG
 		printf("hash_unset([void *], %s)... DONE\n", key);
 #endif
@@ -174,9 +174,5 @@ char *hash_get(void *data, char *key) {
 #ifdef DEBUG
 	printf("hash_get([void *], %s)... DONE\n", key);
 #endif
-	return NULL;
-}
-
-char *hash_find(void *data, char *pattern) {
 	return NULL;
 }
