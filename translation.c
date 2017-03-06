@@ -69,11 +69,14 @@ static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "	strcat(objName, \"[o]\");\n");
 	fprintf(file, " tmp = mfunctions->get(map, objName);\n");
 	fprintf(file, " if ( tmp != NULL ) {\n");
+	fprintf(file, "	 free(objName);\n");
 	fprintf(file, "	 return tmp;\n");
 	fprintf(file, " }\n");
 	fprintf(file, "	strcpy(objName, varName);\n");
 	fprintf(file, "	strcat(objName, \"[x]\");\n");
-	fprintf(file, " return mfunctions->get(map, objName);\n");
+	fprintf(file, " tmp = mfunctions->get(map, objName);\n");
+	fprintf(file, "	free(objName);\n");
+	fprintf(file, "	return tmp;\n");
 	fprintf(file, "}\n\n");
 	
 	fprintf(file, "void %s(void *__internal_string, ctemplate_functions_t *__internal_mfunction, ctemplate_utilities_t *__internal_hfunction, char *__internal_jsonString) {\n",
