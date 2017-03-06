@@ -101,7 +101,7 @@ static int test_cforeach(ctemplate_t *ctemplate) {
 
 static int test_cforeachobject(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cforeachobject.txt", "{ \"array\": [\"hello\", \"world\", {\"how\": \"are you?\"}] }");
-	ASSERTSTR("Item: hello, Item: world, Item: {\"how\": \"are you?\"}", value);
+	ASSERTSTR("Item: hello, Item: world, Item: {\"how\": \"are you?\"} -- How are you?", value);
 	free(value);
 
 	return 0;

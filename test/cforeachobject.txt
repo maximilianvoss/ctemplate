@@ -1,3 +1,4 @@
 <c:forEach var="tmp" items="request.array" statusVar="myStatus">
 Item: <c:out value="${tmp}"><c:if test="${myStatus < 2}">, </c:if>
+<c:if test="${myStatus == 2}"> -- How <c:out value="${tmp.how}"></c:if>
 </c:forEach>
