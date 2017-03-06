@@ -92,8 +92,16 @@ static int test_cchoose(ctemplate_t *ctemplate) {
 }
 
 static int test_cforeach(ctemplate_t *ctemplate) {
-	char *value = ctemplate_executeTemplate(ctemplate, "cforeach.txt", "{ \"array\": [\"hello\", \"world\"] }");
-	ASSERTSTR("Item 1, Item 2, Item 3, Item 4, Item 5", value);
+	char *value = ctemplate_executeTemplate(ctemplate, "cforeach.txt", NULL);
+	ASSERTSTR("Item: 1, Item: 2, Item: 3, Item: 4, Item: 5", value);
+	free(value);
+
+	return 0;
+}
+
+static int test_cforeachobject(ctemplate_t *ctemplate) {
+	char *value = ctemplate_executeTemplate(ctemplate, "cforeachobject.txt", "{ \"array\": [\"hello\", \"world\", {\"how\": \"are you?\"}] }");
+	ASSERTSTR("Item: hello, Item: world, Item: {\"how\": \"are you?\"}", value);
 	free(value);
 
 	return 0;
@@ -117,6 +125,7 @@ int main(int argc, char **argv) {
 	TESTCALL("test_expression", test_expression);
 	TESTCALL("test_cchoose", test_cchoose);
 	TESTCALL("test_cforeach", test_cforeach);
+	TESTCALL("test_cforeachobject", test_cforeachobject);
 
 	ctemplate_destroy(ctemplate);
 	return -1;

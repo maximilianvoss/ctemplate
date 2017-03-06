@@ -60,13 +60,19 @@ static void translation_createSourceHeader(FILE *file) {
 	fprintf(file, "}\n\n");
 
 	fprintf(file, "char *getVariable(ctemplate_functions_t *mfunctions, void *map, char *varName) {\n");
-	fprintf(file, "char *tmp = mfunctions->get(map, varName);\n");
-	fprintf(file, "if ( tmp != NULL ) {\n");
-	fprintf(file, "	return tmp;\n");
-	fprintf(file, "}\n");
+	fprintf(file, " char *tmp = mfunctions->get(map, varName);\n");
+	fprintf(file, " if ( tmp != NULL ) {\n");
+	fprintf(file, " 	return tmp;\n");
+	fprintf(file, " }\n");
 	fprintf(file, "	char *objName = calloc(sizeof(char), strlen(varName) + 4 );\n");
 	fprintf(file, "	strcpy(objName, varName);\n");
 	fprintf(file, "	strcat(objName, \"[o]\");\n");
+	fprintf(file, " tmp = mfunctions->get(map, objName);\n");
+	fprintf(file, " if ( tmp != NULL ) {\n");
+	fprintf(file, "	 return tmp;\n");
+	fprintf(file, " }\n");
+	fprintf(file, "	strcpy(objName, varName);\n");
+	fprintf(file, "	strcat(objName, \"[x]\");\n");
 	fprintf(file, " return mfunctions->get(map, objName);\n");
 	fprintf(file, "}\n\n");
 	
