@@ -1,10 +1,10 @@
 #include "cout.h"
 #include "expression.h"
 
-char *cout_openTag(char *line, FILE *out);
-char *cout_closeTag(char *line, FILE *out);
+static char *cout_openTag(FILE *out, char *line);
+static char *cout_closeTag(FILE *out, char *line);
 
-translation_module_t module_cout = {
+static translation_module_t module_cout = {
 		.tagOpen = "<c:out",
 		.tagOpenLen = 6,
 		.tagClose = "</c:out",
@@ -23,7 +23,7 @@ void cout_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cout);
 }
 
-char *cout_openTag(char *line, FILE *out) {
+static char *cout_openTag(FILE *out, char *line) {
 	csafestring_t *value = modules_extractVariable(line, "value");
 	csafestring_t *defaultValue = modules_extractVariable(line, "default");
 
@@ -34,12 +34,12 @@ char *cout_openTag(char *line, FILE *out) {
 	}
 
 	if ( !safe_strncmp(value, "${", 2) ) {
-		fprintf(out, "tmp = ");
-		expression_eval(value->data, out, true);
+		fprintf(out, "__internal_tmp = ");
+		expression_eval(out, value->data, true);
 		fprintf(out, ";\n");
-		fprintf(out, "safe_strcat(string, (tmp != NULL) ? tmp : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue->data : "");
+		fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, (__internal_tmp != NULL) ? __internal_tmp : \"%s\");\n", ( defaultValue != NULL ) ? defaultValue->data : "");
 	} else {
-		fprintf(out, "safe_strcat(string, \"%s\");\n", value->data);
+		fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, \"%s\");\n", value->data);
 	}
 
 	safe_destroy(value);
@@ -47,6 +47,6 @@ char *cout_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cout_closeTag(char *line, FILE *out) {
+static char *cout_closeTag(FILE *out, char *line) {
 	return modules_findEndOfTag(line) + 1;
 }

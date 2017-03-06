@@ -7,7 +7,13 @@ typedef struct {
 	char *(*get)(void *map, char *key);
 	void (*set)(void *map, char *key, char *value);
 	void (*unset)(void *map, char *key);
-	char *(*find)(void *map, char *pattern);
+	void (*parseJson)(void (*set)(void *map, char *key, char *value), void *data, char *prefix, char *json);
 } ctemplate_functions_t;
+
+typedef struct {
+	char *(*intToString)(char *str, size_t size, int expr);
+	char *(*floatToString)(char *str, size_t size, float expr);
+	char *(*strcat)(csafestring_t *, const char *);
+} ctemplate_utilities_t;
 
 #endif

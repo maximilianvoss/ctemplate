@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
-char *filemanager_getSuffix(char *path);
+static char *filemanager_getSuffix(char *path);
 
 csafestring_t *filemanager_calculateSourcePath(ctemplate_t *ctemplate, char *templateFile) {
 	csafestring_t *sourcePath = safe_clone(ctemplate->workingBaseDir);
@@ -35,7 +35,7 @@ char *filemanager_getFilename(char *path) {
 	return ( pos == NULL ) ? path : pos + 1;
 }
 
-char *filemanager_getSuffix(char *path) {
+static char *filemanager_getSuffix(char *path) {
 	if ( path == NULL ) {
 		return NULL;
 	}

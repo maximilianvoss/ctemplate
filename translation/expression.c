@@ -16,12 +16,12 @@ static regex_t regexPopen;
 static regex_t regexPclose;
 static regex_t regexNot;
 
-void expression_free(pattern_match_t *matches);
-pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation);
-char *expression_functionExpression(char *line, FILE *out);
-char *expression_findEndOfExpression(char *line);
+static void expression_free(pattern_match_t *matches);
+static pattern_match_t *expression_extract(pattern_analyse_t *analysation, char *string);
+static char *expression_functionExpression(FILE *out, char *line);
+static char *expression_findEndOfExpression(char *line);
 
-translation_module_t module_expression = {
+static translation_module_t module_expression = {
 		.tagOpen = "${",
 		.tagOpenLen = 2,
 		.tagClose = NULL,
@@ -37,7 +37,7 @@ void expression_register(translation_module_t *modules) {
 		regcomp(&regexFloat, "^[ |\t]*([0-9]+\\.[0-9]+)", REG_EXTENDED);
 		regcomp(&regexInt, "^[ |\t]*([0-9]+)", REG_EXTENDED);
 		regcomp(&regexString, "^[ |\t]*[\"|\'](.*)[\"|\']", REG_EXTENDED);
-		regcomp(&regexVariable, "^[ |\t]*([a-zA-Z][a-zA-Z0-9]*)", REG_EXTENDED);
+		regcomp(&regexVariable, "^[ |\t]*([a-zA-Z][a-zA-Z0-9\\.]*)", REG_EXTENDED);
 		regcomp(&regexEquation, "^[ |\t]*(eq|ne|==|!=|<=|>=|>|<)", REG_EXTENDED);
 		regcomp(&regexOperator, "^[ |\t]*([\\+|*|-|/])", REG_EXTENDED);
 		regcomp(&regexEmpty, "^[ |\t]*$", REG_EXTENDED);
@@ -61,7 +61,7 @@ void expression_unregister(translation_module_t *modules) {
 	regfree(&regexEmpty);
 }
 
-void expression_eval(char *valueIn, FILE *out, bool returnString) {
+void expression_eval(FILE *out, char *valueIn, bool returnString) {
 	pattern_analyse_t analysation;
 	analysation.hasEquation = false;
 	analysation.hasFloat = false;
@@ -78,7 +78,7 @@ void expression_eval(char *valueIn, FILE *out, bool returnString) {
 		tmp = strchr(expr, '}');
 		*tmp = '\0';
 
-		pattern_match_t *matches = expression_extract(expr, &analysation);
+		pattern_match_t *matches = expression_extract(&analysation, expr);
 		builder_generateCode(out, matches, &analysation, returnString);
 
 		free(dup);
@@ -86,7 +86,7 @@ void expression_eval(char *valueIn, FILE *out, bool returnString) {
 	}
 }
 
-void expression_free(pattern_match_t *matches) {
+static void expression_free(pattern_match_t *matches) {
 	if ( matches == NULL ) {
 		return;
 	}
@@ -95,7 +95,7 @@ void expression_free(pattern_match_t *matches) {
 	free(matches);
 }
 
-pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation) {
+static pattern_match_t *expression_extract(pattern_analyse_t *analysation, char *string) {
 	regmatch_t match[2];
 	pattern_match_t *matches = NULL;
 	pattern_match_t *lastMatch = NULL;
@@ -137,7 +137,7 @@ pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation
 		}
 
 		matched = (pattern_match_t *) malloc(sizeof(pattern_match_t));
-		matched->string = (char *) calloc(sizeof(char), (int64_t) match[1].rm_eo - match[1].rm_so + 1);
+		matched->string = (char *) calloc(sizeof(char), (size_t) match[1].rm_eo - match[1].rm_so + 1);
 		strncpy(matched->string, &string[match[1].rm_so], (int64_t) match[1].rm_eo - match[1].rm_so);
 		string += (int64_t) match[1].rm_eo;
 
@@ -159,14 +159,14 @@ pattern_match_t *expression_extract(char *string, pattern_analyse_t *analysation
 	return matches;
 }
 
-char *expression_findEndOfExpression(char *line) {
+static char *expression_findEndOfExpression(char *line) {
 	return modules_findEndOfElement(line, '}');
 }
 
-char *expression_functionExpression(char *line, FILE *out) {
+static char *expression_functionExpression(FILE *out, char *line) {
 	char *endOfExpression = expression_findEndOfExpression(line);
-	fprintf(out, "safe_strcat(string, ");
-	expression_eval(line, out, true);
+	fprintf(out, "__internal_hfunction->safe_strcat(__internal_string, ");
+	expression_eval(out, line, true);
 	fprintf(out, ");\n");
 	return endOfExpression + 1;
 }

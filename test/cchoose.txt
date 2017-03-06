@@ -1,8 +1,8 @@
 <c:choose>
-<c:when test="${var eq 'value1'}">
+<c:when test="${request.var eq 'value1'}">
 value1 is set
 </c:when>
-<c:when test="${var eq 'value2'}">
+<c:when test="${request.var eq 'value2'}">
 value2 is set
 </c:when>
 <c:otherwise>

@@ -1,0 +1,4 @@
+[submodule "libs/json2map"]
+	path = libs/json2map
+	url = https://github.com/maximilianvoss/json2map.git
+	branch = master

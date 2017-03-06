@@ -1,9 +1,10 @@
+#include <csafestring.h>
 #include "cremove.h"
 
-char *cremove_openTag(char *line, FILE *out);
-char *cremove_closeTag(char *line, FILE *out);
+static char *cremove_openTag(FILE *out, char *line);
+static char *cremove_closeTag(FILE *out, char *line);
 
-translation_module_t module_cremove = {
+static translation_module_t module_cremove = {
 		.tagOpen = "<c:remove",
 		.tagOpenLen = 9,
 		.tagClose = "</c:remove",
@@ -22,7 +23,7 @@ void cremove_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cremove);
 }
 
-char *cremove_openTag(char *line, FILE *out) {
+static char *cremove_openTag(FILE *out, char *line) {
 	csafestring_t *var = modules_extractVariable(line, "var");
 
 	if ( var == NULL ) {
@@ -30,12 +31,12 @@ char *cremove_openTag(char *line, FILE *out) {
 		return modules_findEndOfTag(line) + 1;
 	}
 
-	fprintf(out, "mfunction->unset(data, \"%s\");\n", var->data);
+	fprintf(out, "__internal_mfunction->unset(__internal_root, \"%s*\");\n", var->data);
 
 	safe_destroy(var);
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cremove_closeTag(char *line, FILE *out) {
+static char *cremove_closeTag(FILE *out, char *line) {
 	return modules_findEndOfTag(line) + 1;
 }

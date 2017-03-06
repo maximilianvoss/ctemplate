@@ -4,10 +4,12 @@
 #include <csafestring.h>
 #include "functions.h"
 
+#define MODULE_EXEC_METHOD "execute"
+
 typedef struct s_loader_module {
 	csafestring_t *path;
 	void *handle;
-	void (*method)(csafestring_t *, ctemplate_functions_t *, void *);
+	void (*method)(void *, ctemplate_functions_t *, ctemplate_utilities_t *, char *);
 
 	struct s_loader_module *next;
 	struct s_loader_module *prev;

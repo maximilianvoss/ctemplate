@@ -30,41 +30,41 @@
     if (EXPECTED != ACTUAL)\
         return 1;
 
-int test_fileNotExists(ctemplate_t *ctemplate) {
+static int test_fileNotExists(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "filenotexists.txt", NULL);
 	ASSERTISNULL(value);
 	return 0;
 }
 
-int test_cout(ctemplate_t *ctemplate) {
+static int test_cout(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cout.txt", "{\"var\": \"value\"}");
-	ASSERTSTR("var: var,var-eval: value,var-default: defaultValue,var-default-not-set: ", value);
+	ASSERTSTR("var: var,var-eval: value,var-default: defaultValue,var-default-not-set: ,request: {\"var\": \"value\"}", value);
 	free(value);
 	return 0;
 }
 
-int test_cset(ctemplate_t *ctemplate) {
+static int test_cset(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cset.txt", NULL);
 	ASSERTSTR("var1: value1,var2: value1", value);
 	free(value);
 	return 0;
 }
 
-int test_cremove(ctemplate_t *ctemplate) {
+static int test_cremove(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cremove.txt", NULL);
 	ASSERTSTR("value,Var not set", value);
 	free(value);
 	return 0;
 }
 
-int test_cif(ctemplate_t *ctemplate) {
+static int test_cif(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cif.txt", NULL);
 	ASSERTSTR("Works again", value);
 	free(value);
 	return 0;
 }
 
-int test_expression(ctemplate_t *ctemplate) {
+static int test_expression(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "expression.txt", "{\"var1\":\"value\", \"var2\":4 }");
 	ASSERTSTR(
 			"0: Direct Expression,1: Hallo,2: Hallo,3: value,4: 1,5: 0,6: 40,7: 40.000000,8: 40,9: 40.000000,10: 0,11: 1,12: 1,13: 1,14: 1,15: 0,16: 1,17: 1,18: 0,19: 0,20: 1,21: 0,22: 1,23: 0,\
@@ -73,17 +73,17 @@ int test_expression(ctemplate_t *ctemplate) {
 	return 0;
 }
 
-int test_cchoose(ctemplate_t *ctemplate) {
+static int test_cchoose(ctemplate_t *ctemplate) {
 	char *value;
 
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", "{\"var\":\"value1\"}");
 	ASSERTSTR("value1 is set", value);
 	free(value);
-	
+
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", "{\"var\":\"value2\"}");
 	ASSERTSTR("value2 is set", value);
 	free(value);
-	
+
 	value = ctemplate_executeTemplate(ctemplate, "cchoose.txt", NULL);
 	ASSERTSTR("nothing is set", value);
 	free(value);
@@ -91,11 +91,19 @@ int test_cchoose(ctemplate_t *ctemplate) {
 	return 0;
 }
 
-int test_cforeach(ctemplate_t *ctemplate) {
+static int test_cforeach(ctemplate_t *ctemplate) {
 	char *value = ctemplate_executeTemplate(ctemplate, "cforeach.txt", NULL);
-	ASSERTSTR("Item 1, Item 2, Item 3, Item 4, Item 5", value);
+	ASSERTSTR("Item: 1, Item: 2, Item: 3, Item: 4, Item: 5", value);
 	free(value);
-	
+
+	return 0;
+}
+
+static int test_cforeachobject(ctemplate_t *ctemplate) {
+	char *value = ctemplate_executeTemplate(ctemplate, "cforeachobject.txt", "{ \"array\": [\"hello\", \"world\", {\"how\": \"are you?\"}] }");
+	ASSERTSTR("Item: hello, Item: world, Item: {\"how\": \"are you?\"}", value);
+	free(value);
+
 	return 0;
 }
 
@@ -106,7 +114,6 @@ int main(int argc, char **argv) {
 	methods.get = hash_get;
 	methods.set = hash_set;
 	methods.unset = hash_unset;
-	methods.find = hash_find;
 
 	ctemplate_t *ctemplate = ctemplate_init(TESTPATH, NULL, &methods, 1);
 
@@ -118,6 +125,7 @@ int main(int argc, char **argv) {
 	TESTCALL("test_expression", test_expression);
 	TESTCALL("test_cchoose", test_cchoose);
 	TESTCALL("test_cforeach", test_cforeach);
+	TESTCALL("test_cforeachobject", test_cforeachobject);
 
 	ctemplate_destroy(ctemplate);
 	return -1;

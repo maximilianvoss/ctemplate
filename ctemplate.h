@@ -13,6 +13,7 @@ typedef struct {
 	csafestring_t *workingBaseDir;
 	bool alwaysRecompile;
 	ctemplate_functions_t *mfunctions;
+	ctemplate_utilities_t hfunctions;
 	translation_module_t *translation_modules;
 } ctemplate_t;
 

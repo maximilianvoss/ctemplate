@@ -1,10 +1,11 @@
+#include <csafestring.h>
 #include "cset.h"
 #include "expression.h"
 
-char *cset_openTag(char *line, FILE *out);
-char *cset_closeTag(char *line, FILE *out);
+static char *cset_openTag(FILE *out, char *line);
+static char *cset_closeTag(FILE *out, char *line);
 
-translation_module_t module_cset = {
+static translation_module_t module_cset = {
 		.tagOpen = "<c:set",
 		.tagOpenLen = 6,
 		.tagClose = "</c:set",
@@ -23,7 +24,7 @@ void cset_unregister(translation_module_t *modules) {
 	modules_unregister(modules, &module_cset);
 }
 
-char *cset_openTag(char *line, FILE *out) {
+static char *cset_openTag(FILE *out, char *line) {
 	csafestring_t *value = modules_extractVariable(line, "value");
 	csafestring_t *var = modules_extractVariable(line, "var");
 
@@ -34,11 +35,11 @@ char *cset_openTag(char *line, FILE *out) {
 	}
 
 	if ( !safe_strncmp(value, "${", 2) ) {
-		fprintf(out, "mfunction->set(data, \"%s\", ", var->data);
-		expression_eval(value->data, out, true);
+		fprintf(out, "setVariable(__internal_mfunction, __internal_root, \"%s\",", var->data);
+		expression_eval(out, value->data, true);
 		fprintf(out, ");\n");
 	} else {
-		fprintf(out, "mfunction->set(data, \"%s\", \"%s\");\n", var->data, value->data);
+		fprintf(out, "setVariable(__internal_mfunction, __internal_root, \"%s\", \"%s\");\n", var->data, value->data);
 	}
 
 	safe_destroy(value);
@@ -46,6 +47,6 @@ char *cset_openTag(char *line, FILE *out) {
 	return modules_findEndOfTag(line) + 1;
 }
 
-char *cset_closeTag(char *line, FILE *out) {
+static char *cset_closeTag(FILE *out, char *line) {
 	return modules_findEndOfTag(line) + 1;
 }

@@ -2,17 +2,18 @@
 #include <string.h>
 #include "expression_builder.h"
 
-pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation);
-bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
+static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation);
+static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches);
 
-bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
+static bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 	if ( matches->type == VARIABLE || matches->type == STRING ) {
 		if ( matches->next != NULL && matches->next->type == EQUATION && matches->next->next != NULL && ( matches->next->next->type == STRING || matches->next->next->type == VARIABLE ) ) {
+			
 			if ( matches->type == VARIABLE ) {
-				fprintf(out, "mfunction->get(data, \"%s\") != NULL && ", matches->string);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\") != NULL && ", matches->string);
 			}
 			if ( matches->next->next->type == VARIABLE ) {
-				fprintf(out, "mfunction->get(data, \"%s\") != NULL && ", matches->next->next->string);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\") != NULL && ", matches->next->next->string);
 			}
 			
 			if ( !strncmp(matches->next->string, "eq", 2) || !strncmp(matches->next->string, "==", 2) ) {
@@ -22,35 +23,36 @@ bool builder_buildStringCompare(FILE *out, pattern_match_t *matches) {
 			}
 
 			if ( matches->type == VARIABLE ) {
-				fprintf(out, "mfunction->get(data, \"%s\"), ", matches->string);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\"), ", matches->string);
 			} else {
 				fprintf(out, "\"%s\", ", matches->string);
 			}
 
 			if ( matches->next->next->type == VARIABLE ) {
-				fprintf(out, "mfunction->get(data, \"%s\")", matches->next->next->string);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", matches->next->next->string);
 			} else {
 				fprintf(out, "\"%s\"", matches->next->next->string);
 			}
 			fprintf(out, ")");
+
 			return true;
 		}
 	}
 	return false;
 }
 
-pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation) {
+static pattern_match_t *builder_buildVariable(FILE *out, pattern_match_t *matches, pattern_analyse_t *analysation) {
 	if ( matches->type == VARIABLE ) {
 		if ( !analysation->hasFloat && !analysation->hasInt && !analysation->hasOperator ) {
 			if ( builder_buildStringCompare(out, matches) ) {
 				return matches->next->next;
 			} else {
-				fprintf(out, "mfunction->get(data, \"%s\")", matches->string);
+				fprintf(out, "getVariable(__internal_mfunction, __internal_root, \"%s\")", matches->string);
 			}
 		} else if ( analysation->hasFloat ) {
-			fprintf(out, "atof(mfunction->get(data, \"%s\"))", matches->string);
+			fprintf(out, "atof(getVariable(__internal_mfunction, __internal_root, \"%s\"))", matches->string);
 		} else if ( analysation->hasInt ) {
-			fprintf(out, "atol(mfunction->get(data, \"%s\"))", matches->string);
+			fprintf(out, "atol(getVariable(__internal_mfunction, __internal_root, \"%s\"))", matches->string);
 		}
 	}
 	return matches;
@@ -60,9 +62,9 @@ void builder_generateCode(FILE *out, pattern_match_t *matches, pattern_analyse_t
 
 	if ( returnString ) {
 		if ( analysation->hasFloat ) {
-			fprintf(out, "floatToString(expressionString, 255, ");
+			fprintf(out, "__internal_hfunction->floatToString(__internal_expressionString, EXPR_STRING_LENGTH, ");
 		} else if ( analysation->hasInt || analysation->hasEquation ) {
-			fprintf(out, "intToString(expressionString, 255, ");
+			fprintf(out, "__internal_hfunction->intToString(__internal_expressionString, EXPR_STRING_LENGTH, ");
 		}
 	}
 

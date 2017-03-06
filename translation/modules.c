@@ -7,8 +7,6 @@
 #include "cchoose.h"
 #include "expression.h"
 
-char *modules_findEndOfTag(char *line);
-
 csafestring_t *modules_extractVariable(char *line, char *name) {
 	csafestring_t *searchStr = safe_create(name);
 	safe_strchrappend(searchStr, '=');
@@ -66,9 +64,9 @@ void *modules_matches(translation_module_t *modules, char *line) {
 	return NULL;
 }
 
-char *modules_execute(void *method, char *line, FILE *out) {
-	char *(*exec)(char *, FILE *) = method;
-	return exec(line, out);
+char *modules_execute(FILE *out, void *method, char *line) {
+	char *(*exec)(FILE *, char *) = method;
+	return exec(out, line);
 }
 
 char *modules_findEndOfElement(char *line, char chr) {
