@@ -90,7 +90,6 @@ static void ctemplate_parseJson(void (*set)(void *map, char *key, char *value), 
 	json2map_destroy(json2mapObj);
 }
 
-
 static loader_module_t *ctemplate_moduleLoader(ctemplate_t *ctemplate, csafestring_t *templatePath, csafestring_t *sourcePath, csafestring_t *libraryPath) {
 	loader_module_t *module = loader_getModule(ctemplate->modules, templatePath);
 	if ( ctemplate->alwaysRecompile || ctemplate_isRecompilationNecessary(templatePath->data, sourcePath->data, libraryPath->data) ) {
