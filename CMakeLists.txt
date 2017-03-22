@@ -14,10 +14,12 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3")
 
 add_subdirectory(translation)
 
-add_library(ctemplate ${SOURCE_FILES})
-target_link_libraries(ctemplate json2map csafestring dl ctemplate_translation)
-install(TARGETS ctemplate DESTINATION /usr/local/lib)
-install(FILES ctemplate.h DESTINATION /usr/local/include)
+if (NOT TARGET ctemplate)
+    add_library(ctemplate ${SOURCE_FILES})
+    target_link_libraries(ctemplate json2map csafestring dl ctemplate_translation)
+    install(TARGETS ctemplate DESTINATION /usr/local/lib)
+    install(FILES ctemplate.h DESTINATION /usr/local/include)
+endif ()
 
 enable_testing()
 add_subdirectory(test)

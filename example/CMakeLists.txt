@@ -7,5 +7,7 @@ set(SOURCE_FILES
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DEXAMPLEPATH='\"${CMAKE_SOURCE_DIR}/example\"'")
 
-add_executable(ctemplate_example ${SOURCE_FILES})
-target_link_libraries(ctemplate_example ctemplate)
+if (NOT TARGET ctemplate_example)
+    add_executable(ctemplate_example ${SOURCE_FILES})
+    target_link_libraries(ctemplate_example ctemplate)
+endif ()

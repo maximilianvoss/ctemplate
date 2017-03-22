@@ -2,3 +2,8 @@
 	path = libs/json2map
 	url = https://github.com/maximilianvoss/json2map.git
 	branch = master
+	
+[submodule "libs/csafestring"]
+	path = libs/csafestring
+	url = https://github.com/maximilianvoss/csafestring.git
+	branch = master
